@@ -4,7 +4,7 @@ namespace rrsoacis\apps\tkmnet\run_manager;
 use rrsoacis\component\common\AbstractPage;
 use rrsoacis\system\Config;
 
-class SettingsPage extends AbstractPage
+class MainPage extends AbstractPage
 {
 	public function controller($params)
 	{
