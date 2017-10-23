@@ -11,7 +11,7 @@ e.g. `rrsoacis\apps\tkmnet\run_manager`
 
 ## manifest.json
 - name : "{App name}"
-- version : "{Major}.{Minor}.[Revision]"
+- version : "{Major}.{Minor}.{Revision}"
 - description : "{App description}"
 - icon : "{App simbol mark}" (Select from http://fontawesome.io/icons/ )
 - main_controller : "{Full class name of main page}"
