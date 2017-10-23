@@ -16,7 +16,7 @@ e.g. `rrsoacis\apps\tkmnet\run_manager`
 - icon : "{App simbol mark}" (Select from http://fontawesome.io/icons/ )
 - main_controller : "{Full class name of main page}"
 - sub_controller : [ ["{Url suffix}" : "{Full class name of sub page}"] ]
-- dependencies : [ ["{Dependenced package name}" : "{Minimum of version}"] ]
+- dependencies : [ ["{Dependence package name}" : "{Minimum of version}"] ]
 
 ## URL
 - Main page
