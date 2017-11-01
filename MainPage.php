@@ -1,4 +1,5 @@
 <?php
+
 namespace rrsoacis\apps\tkmnet\run_manager;
 
 use rrsoacis\component\common\AbstractPage;
@@ -17,8 +18,8 @@ class MainPage extends AbstractPage
 		self::writeContentHeader("Run Manager");
 
 		self::beginContent();
-?>
-<?php
+		?>
+		<?php
 		self::endContent();
 	}
 }
