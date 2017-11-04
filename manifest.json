@@ -4,6 +4,10 @@
     "description" : "Simulation run manager for S.Takami",
     "icon" : "fa-bar-chart",
     "main_controller" : "rrsoacis\\apps\\tkmnet\\run_manager\\MainPage",
-    "sub_controller" : [ ],
+    "sub_controller" : [
+			["add_base","rrsoacis\\apps\\tkmnet\\run_manager\\AddBasePage"],
+			["add_reps","rrsoacis\\apps\\tkmnet\\run_manager\\AddReplaceSetsPage"],
+			["add_rep","rrsoacis\\apps\\tkmnet\\run_manager\\AddReplaceSetPage"]
+		],
     "dependencies" : [ ]
 }
