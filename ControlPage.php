@@ -18,7 +18,7 @@ class ControlPage extends AbstractPage
 
 		$cmd = $params[0];
 
-		if ($cmd === "reserve") {
+		if ($cmd === "post") {
 			$run = BaseManager::getRun($params[1]);
 			if ($run != null) {
 				BaseManager::postRunToOACIS($params[1]);

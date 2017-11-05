@@ -99,7 +99,7 @@ class BaseManager
 		$simulator = json_decode(file_get_contents($tmpFileOut), true);
 		system("rm -f " . $tmpFileOut);
 		$simulator['name'] = "RO_tkmnetRM_" . uniqid();
-		$simulator['command'] = 'WD=`pwd`;cd ..;/home/oacis/rrs-oacis/rrsenv/script/rrscluster -i ${WD}/_input.json -l ${WD}';
+		$simulator['command'] = 'WD=`pwd`;cd ..;/home/oacis/rrs-oacis/rrsenv/script/rrscluster run -i ${WD}/_input.json -l ${WD}';
 		$simulator['executable_on_ids'][] = ClusterManager::getMainHostGroup();
 		$simulator['support_input_json'] = true;
 
@@ -135,15 +135,15 @@ class BaseManager
 
 		$parameter1 = [];
 		$parameter1['key'] = 'IS_MOD';
-		$parameter1['type'] = 'Boolean';
-		$parameter1['default'] = false;
+		$parameter1['type'] = 'String';
+		$parameter1['default'] = '0';
 		$parameter1['description'] = '';
 		$simulator['parameter_definitions'][] = $parameter1;
 
 		$parameter1 = [];
 		$parameter1['key'] = 'IS_DEV';
-		$parameter1['type'] = 'Boolean';
-		$parameter1['default'] = false;
+		$parameter1['type'] = 'String';
+		$parameter1['default'] = '0';
 		$parameter1['description'] = '';
 		$simulator['parameter_definitions'][] = $parameter1;
 
@@ -370,21 +370,25 @@ class BaseManager
 			$input = "";
 			foreach ($run["params"] as $param) {
 				if ($input !== "") { $input .= ","; }
-				$input .='"":""';
+				$input .='"'.$param[0].'":"'.$param[1].'"';
+			}
+			foreach (self::getDefaultParameters($run["baseName"]) as $param) {
+				if ($input !== "") { $input .= ","; }
+				$input .='"'.$param[0].'":"'.$param[1].'"';
 			}
 
 			$out_filename = '/tmp/out_' . $scriptId . '.json';
 
 			$command = Config::$OACISCLI_PATH . " create_parameter_sets";
 			$command .= ' -s ' . $simulatorName;
-			$command .= ' -i \\\'{'.$input.'}\\\'';
+			$command .= ' -i \\\'{'.$input.',"IS_MOD":"0","IS_DEV":"0"}\\\'';
 			$command .= ' -r \\\'{"num_runs":1,"mpi_procs":0,"omp_threads":0,"priority":1,"submitted_to":"' . ClusterManager::getMainHostGroup() . '","host_parameters":null}\\\'';
 			$command .= ' -o ' . $out_filename;
 
 			$script = "exec('".$command."');";
 
-			$script .= '$id = "'.$scriptId.'"";';
-			$script .= '$filename = "'.$out_filename.'"";';
+			$script .= '$id = "'.$scriptId.'";';
+			$script .= '$filename = "'.$out_filename.'";';
 			$script .= '$outputs = json_decode( file_get_contents($filename), true );';
 			$script .= 'foreach ($outputs as $out) {';
 			$script .= '  $paramId = $out["parameter_set_id"];';
@@ -393,7 +397,7 @@ class BaseManager
 			$script .= '  $paramSet = json_decode($paramSetJson, true);';
 			$script .= '  foreach ($paramSet["runs"] as $run) { $runId = $run["id"]; }';
 			$script .= '  $db = getDatabase();';
-			$script .= '  $sth = $db->prepare("update run set paramId=:paramId, runId=:runId, state=1 where name=:name;");';
+			$script .= '  $sth = $db->prepare("update run set paramId=:paramId, runId=:runId, state=2 where name=:name;");';
 			$script .= '  $sth->bindValue(":paramId", $paramId, PDO::PARAM_STR);';
 			$script .= '  $sth->bindValue(":runId", $runId, PDO::PARAM_STR);';
 			$script .= '  $sth->bindValue(":name", $id, PDO::PARAM_STR);';
@@ -403,7 +407,28 @@ class BaseManager
 			$script .= "exec('rm -f ".$out_filename."');";
 
 			ScriptManager::queuePhpScript($script);
+
+			$db = self::connectDB();
+			$sth = $db->prepare("update run set state=1 where name=:name;");
+			$sth->bindValue(':name', $runName, PDO::PARAM_STR);
+			$sth->execute();
 		}
+	}
+
+	public static function getDefaultParameters($name)
+	{
+		$db = self::connectDB();
+		$sth = $db->prepare("select * from base,parameter where base.id=parameter.base and base.name=:name and def!='';");
+		$sth->bindValue(':name', $name, PDO::PARAM_STR);
+		$sth->execute();
+		$params = [];
+		while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
+			$param = [];
+			$param[0] = $row["name"];
+			$param[1] = $row["def"];
+			$params[] = $param;
+		}
+		return $params;
 	}
 
 	public static function getReplaceSetFromID($replaceSetID)
@@ -465,52 +490,6 @@ class BaseManager
 		return $runs;
 	}
 
-	/**
-	 *
-	 * */
-	public static function addMap($sessionName, $mapName)
-	{
-		$session = Self::getSession($sessionName);
-		if (count(MapManager::getMap($mapName)) <= 0) {
-			return false;
-		}
-		if (count($session) <= 0) {
-			return false;
-		}
-
-		$db = self::connectDB();
-		$sth = $db->prepare("insert into linkedMap(session, map) values(:session, :map);");
-		$sth->bindValue(':session', $sessionName, PDO::PARAM_STR);
-		$sth->bindValue(':map', $mapName, PDO::PARAM_STR);
-		$sth->execute();
-
-		foreach ($session['agents'] as $agent) {
-			if (!isset($agent['name']) || $agent['name'] == '') {
-				continue;
-			}
-
-			$scriptId = uniqid();
-			$sth = $db->prepare("insert into run(name, session, map, agent) values(:name, :session, :map, :agent);");
-			$sth->bindValue(':name', $scriptId, PDO::PARAM_STR);
-			$sth->bindValue(':session', $sessionName, PDO::PARAM_STR);
-			$sth->bindValue(':map', $mapName, PDO::PARAM_STR);
-			$sth->bindValue(':agent', $agent['name'], PDO::PARAM_STR);
-			$sth->execute();
-
-			$script = "#!/bin/bash\n\n";
-			$script .= Config::$OACISCLI_PATH . " create_parameter_sets";
-			$script .= ' -s ' . $sessionName;
-			$script .= ' -i \'{"MAP":"' . $mapName . '","F":"' . $agent['name'] . '","P":"' . $agent['name'] . '","A":"' . $agent['name'] . '"}\'';
-			$script .= ' -r \'{"num_runs":1,"mpi_procs":0,"omp_threads":0,"priority":1,"submitted_to":"' . ClusterManager::getMainHostGroup() . '","host_parameters":null}\'';
-			$script .= ' -o /tmp/out_' . $scriptId . '.json';
-			$script .= "\n";
-			$script .= 'php ' . realpath(dirname(__FILE__)) . '/update_runid.php \'' . $scriptId . '\' /tmp/out_' . $scriptId . '.json';
-			file_put_contents('/home/oacis/rrs-oacis/oacis-queue/scripts/' . $scriptId, $script);
-			exec('nohup /home/oacis/rrs-oacis/oacis-queue/main.pl ' . $scriptId . ' > /dev/null &');
-		}
-
-		return true;
-	}
 
 	private static function connectDB()
 	{

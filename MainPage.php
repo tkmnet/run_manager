@@ -32,7 +32,7 @@ class MainPage extends AbstractPage
 				"<a href='../../run_manager/".$this->base["name"]."'>".$this->base["name"]."</a>"]);
 			$this->printRunList();
 		} else if ($this->base != null) {
-			self::writeContentHeader($this->base["name"],"Run Manager", ["<a href='../../run_manager'>Run Manager</a>"]);
+			self::writeContentHeader($this->base["name"],"Run Manager", ["<a href='../run_manager'>Run Manager</a>"]);
 			$this->printBasePage();
 		} else {
 			self::writeContentHeader("Run Manager");
@@ -65,8 +65,8 @@ class MainPage extends AbstractPage
 								<tr>
 									<td><?= $run["name"] ?></td>
 									<td><?= $run["replaceSetArray"] ?></td>
-									<td><button class="btn btn-xs btn-warning" onclick="location.href='../../run_manager-control/reserve/<?= $run["name"] ?>'">
-											<i class="fa fa-arrow-right"></i> Reserve</button></td>
+									<td><button class="btn btn-xs btn-info" onclick="location.href='../../run_manager-control/post/<?= $run["name"] ?>'">
+											<i class="fa fa-arrow-right"></i> Post</button></td>
 								</tr>
 							<?php } ?>
 						</table>
