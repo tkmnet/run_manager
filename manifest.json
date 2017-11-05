@@ -7,7 +7,8 @@
     "sub_controller" : [
 			["add_base","rrsoacis\\apps\\tkmnet\\run_manager\\AddBasePage"],
 			["add_reps","rrsoacis\\apps\\tkmnet\\run_manager\\AddReplaceSetsPage"],
-			["add_rep","rrsoacis\\apps\\tkmnet\\run_manager\\AddReplaceSetPage"]
+			["add_rep","rrsoacis\\apps\\tkmnet\\run_manager\\AddReplaceSetPage"],
+			["control","rrsoacis\\apps\\tkmnet\\run_manager\\ControlPage"]
 		],
     "dependencies" : [ ]
 }

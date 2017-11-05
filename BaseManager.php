@@ -10,6 +10,7 @@ use \MongoClient;
 use MongoDB\BSON\ObjectID;
 use MongoDB\BSON\UTCDateTime;
 use \PDO;
+use rrsoacis\manager\ScriptManager;
 use rrsoacis\system\Config;
 use rrsoacis\system\Agent;
 use rrsoacis\exception\AgentNotFoundException;
@@ -98,7 +99,7 @@ class BaseManager
 		$simulator = json_decode(file_get_contents($tmpFileOut), true);
 		system("rm -f " . $tmpFileOut);
 		$simulator['name'] = "RO_tkmnetRM_" . uniqid();
-		$simulator['command'] = "/home/oacis/rrs-oacis/rrsenv/script/rrscluster";
+		$simulator['command'] = 'WD=`pwd`;cd ..;/home/oacis/rrs-oacis/rrsenv/script/rrscluster -i ${WD}/_input.json -l ${WD}';
 		$simulator['executable_on_ids'][] = ClusterManager::getMainHostGroup();
 		$simulator['support_input_json'] = true;
 
@@ -311,6 +312,9 @@ class BaseManager
 	public static function generateRuns($name, $replaceSet)
 	{
 		if (count(self::getReplaceableParameter($name)) > 0) { return; }
+
+		$base = BaseManager::getBase($name);
+
 		$select = "select * from ";
 		$db = self::connectDB();
 		$sth = $db->prepare("select replaceSets from replaceSet where id=:id;");
@@ -348,11 +352,117 @@ class BaseManager
 				}
 				$params .= $r;
 			}
-			$sth2 = $db->prepare("insert into run(name, replaceSetArray) values(:name, :params);");
-			$sth2->bindValue(':name', uniqid(), PDO::PARAM_STR);
+			$sth2 = $db->prepare("insert into run(name, base, replaceSetArray) values(:name, :base, :params);");
+			$sth2->bindValue(':name', str_replace(".", "0", uniqid("",true)), PDO::PARAM_STR);
+			$sth2->bindValue(':base', $base["id"], PDO::PARAM_STR);
 			$sth2->bindValue(':params', $params, PDO::PARAM_STR);
 			$sth2->execute();
 		}
+	}
+
+	public static function postRunToOACIS($runName)
+	{
+		$run = self::getRun($runName);
+		if ($run != null) {
+			$scriptId = $run["name"];
+			$simulatorName = $run["baseName"];
+
+			$input = "";
+			foreach ($run["params"] as $param) {
+				if ($input !== "") { $input .= ","; }
+				$input .='"":""';
+			}
+
+			$out_filename = '/tmp/out_' . $scriptId . '.json';
+
+			$command = Config::$OACISCLI_PATH . " create_parameter_sets";
+			$command .= ' -s ' . $simulatorName;
+			$command .= ' -i \\\'{'.$input.'}\\\'';
+			$command .= ' -r \\\'{"num_runs":1,"mpi_procs":0,"omp_threads":0,"priority":1,"submitted_to":"' . ClusterManager::getMainHostGroup() . '","host_parameters":null}\\\'';
+			$command .= ' -o ' . $out_filename;
+
+			$script = "exec('".$command."');";
+
+			$script .= '$id = "'.$scriptId.'"";';
+			$script .= '$filename = "'.$out_filename.'"";';
+			$script .= '$outputs = json_decode( file_get_contents($filename), true );';
+			$script .= 'foreach ($outputs as $out) {';
+			$script .= '  $paramId = $out["parameter_set_id"];';
+			$script .= '  $runId = "";';
+			$script .= '  $paramSetJson = file_get_contents("http://localhost:3000/parameter_sets/".$paramId.".json");';
+			$script .= '  $paramSet = json_decode($paramSetJson, true);';
+			$script .= '  foreach ($paramSet["runs"] as $run) { $runId = $run["id"]; }';
+			$script .= '  $db = getDatabase();';
+			$script .= '  $sth = $db->prepare("update run set paramId=:paramId, runId=:runId, state=1 where name=:name;");';
+			$script .= '  $sth->bindValue(":paramId", $paramId, PDO::PARAM_STR);';
+			$script .= '  $sth->bindValue(":runId", $runId, PDO::PARAM_STR);';
+			$script .= '  $sth->bindValue(":name", $id, PDO::PARAM_STR);';
+			$script .= '  $sth->execute();';
+			$script .= '}';
+
+			$script .= "exec('rm -f ".$out_filename."');";
+
+			ScriptManager::queuePhpScript($script);
+		}
+	}
+
+	public static function getReplaceSetFromID($replaceSetID)
+	{
+		$db = self::connectDB();
+		$sth = $db->prepare("select * from replaceSet where id=:id;");
+		$sth->bindValue(':id', $replaceSetID, PDO::PARAM_INT);
+		$sth->execute();
+		$replaceSet = null;
+		while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
+			$replaceSet = $row;
+			$sth2 = $db->prepare("select *,parameter.name as parameterName from parameter,replace where parameter.id=replace.parameter and replaceSet=:setId;");
+			$sth2->bindValue(':setId', $replaceSet["id"], PDO::PARAM_INT);
+			$sth2->execute();
+			$replaces = [];
+			while ($row2 = $sth2->fetch(PDO::FETCH_ASSOC)) {
+				$replaces[] = $row2;
+			}
+			$replaceSet["replace"] = $replaces;
+		}
+		return $replaceSet;
+	}
+
+	public static function getRun($runName)
+	{
+		$db = self::connectDB();
+		$sth = $db->prepare("select *,base.name as baseName from base,run where run.base=base.id and run.name=:name;");
+		$sth->bindValue(':name', $runName, PDO::PARAM_STR);
+		$sth->execute();
+		$run = null;
+		while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
+			$run = $row;
+			$params = [];
+			$replaceSetIDArray = explode(",", $row["replaceSetArray"]);
+			foreach ($replaceSetIDArray as $replaceSetID) {
+				$replaceSet = self::getReplaceSetFromID($replaceSetID);
+				foreach ($replaceSet["replace"] as $replace) {
+					$param = [];
+					$param[0] = $replace["parameterName"];
+					$param[1] = $replace["value"];
+					$params[] = $param;
+				}
+			}
+			$run["params"] = $params;
+		}
+		return $run;
+	}
+
+	public static function getPendingRunList($name, $offset, $limit)
+	{
+		$db = self::connectDB();
+		$sth = $db->prepare("select * from base,run where run.base=base.id and base.name=:base and run.state<0;");
+		$sth->bindValue(':base', $name, PDO::PARAM_STR);
+		$sth->execute();
+		$runs = [];
+		while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
+			$runs[] = $row;
+		}
+		return $runs;
 	}
 
 	/**
@@ -402,126 +512,6 @@ class BaseManager
 		return true;
 	}
 
-	/**
-	 *
-	 * */
-	public static function removeMap($sessionName, $mapName)
-	{
-		$session = Self::getSession($sessionName);
-		if (count(MapManager::getMap($mapName)) <= 0) {
-			return false;
-		}
-		if (count($session) <= 0) {
-			return false;
-		}
-
-		$db = self::connectDB();
-		$sth = $db->prepare("select runId from run where session=:session and map=:map;");
-		$sth->bindValue(':session', $sessionName, PDO::PARAM_STR);
-		$sth->bindValue(':map', $mapName, PDO::PARAM_STR);
-		$sth->execute();
-		while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
-			$scriptId = uniqid();
-
-			$script = "#!/bin/bash\n\n";
-			$script .= Config::$OACISCLI_PATH . " destroy_runs_by_ids";
-			$script .= ' ' . $row['runId'];
-
-			file_put_contents('/home/oacis/rrs-oacis/oacis-queue/scripts/' . $scriptId, $script);
-			exec('nohup /home/oacis/rrs-oacis/oacis-queue/main.pl ' . $scriptId . ' > /dev/null &');
-		}
-		$db->query("delete from run where session='" . $sessionName . "' and map='" . $mapName . "';");
-
-		$sth = $db->prepare("delete from linkedMap where session=:session and map=:map;");
-		$sth->bindValue(':session', $sessionName, PDO::PARAM_STR);
-		$sth->bindValue(':map', $mapName, PDO::PARAM_STR);
-		$sth->execute();
-
-		return true;
-	}
-
-	/**
-	 *
-	 * */
-	public static function repost($sessionName, $mapName, $agentName)
-	{
-		$session = Self::getSession($sessionName);
-		if (count(MapManager::getMap($mapName)) <= 0) {
-			return false;
-		}
-		if (count($session) <= 0) {
-			return false;
-		}
-
-		$db = self::connectDB();
-
-		$scriptId = uniqid();
-		$sth = $db->prepare("insert into run(name, session, map, agent) values(:name, :session, :map, :agent);");
-		$sth->bindValue(':name', $scriptId, PDO::PARAM_STR);
-		$sth->bindValue(':session', $sessionName, PDO::PARAM_STR);
-		$sth->bindValue(':map', $mapName, PDO::PARAM_STR);
-		$sth->bindValue(':agent', $agentName, PDO::PARAM_STR);
-		$sth->execute();
-
-		$script = "#!/bin/bash\n\n";
-		$script .= Config::$OACISCLI_PATH . " create_parameter_sets";
-		$script .= ' -s ' . $sessionName;
-		$script .= ' -i \'{"MAP":"' . $mapName . '","F":"' . $agentName . '","P":"' . $agentName . '","A":"' . $agentName . '"}\'';
-		$script .= ' -r \'{"num_runs":1,"mpi_procs":0,"omp_threads":0,"priority":1,"submitted_to":"' . ClusterManager::getMainHostGroup() . '","host_parameters":null}\'';
-		$script .= ' -o /tmp/out_' . $scriptId . '.json';
-		$script .= "\n";
-		$script .= 'php ' . realpath(dirname(__FILE__)) . '/update_runid.php \'' . $scriptId . '\' /tmp/out_' . $scriptId . '.json';
-		file_put_contents('/home/oacis/rrs-oacis/oacis-queue/scripts/' . $scriptId, $script);
-		exec('nohup /home/oacis/rrs-oacis/oacis-queue/main.pl ' . $scriptId . ' > /dev/null &');
-
-		return true;
-	}
-
-	/**
-	 *
-	 * */
-	public static function rerun($runId)
-	{
-		$db = self::connectDB();
-		$sth = $db->prepare("select runId,paramId,agent,map,session from run where runId=:runId;");
-		$sth->bindValue(':runId', $runId, PDO::PARAM_STR);
-		$sth->execute();
-		while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
-			if (!isset($row['agent']) || $row['agent'] == '') {
-				continue;
-			}
-
-			$scriptId = uniqid();
-
-			$sth = $db->prepare("update run set name=:name, agent=:agent where runId=:runId;");
-			$sth->bindValue(':name', $scriptId, PDO::PARAM_STR);
-			$sth->bindValue(':runId', $runId, PDO::PARAM_STR);
-			$sth->bindValue(':agent', $row['agent'], PDO::PARAM_STR);
-			$sth->execute();
-
-			$script = "#!/bin/bash\n\n";
-			$script .= "/home/oacis/oacis/bin/oacis_ruby /home/oacis/rrs-oacis/ruby/discard.rb " . $row['paramId'];
-			$script .= "\n";
-			$script .= "sleep 5";
-			$script .= "\n";
-			$script .= Config::$OACISCLI_PATH . " create_parameter_sets";
-			$script .= ' -s ' . $row['session'];
-			$script .= ' -i \'{"MAP":"' . $row['map'] . '","F":"' . $row['agent'] . '","P":"' . $row['agent'] . '","A":"' . $row['agent'] . '"}\'';
-			$script .= ' -r \'{"num_runs":1,"mpi_procs":0,"omp_threads":0,"priority":1,"submitted_to":"' . ClusterManager::getMainHostGroup() . '","host_parameters":null}\'';
-			$script .= ' -o /tmp/out_' . $scriptId . '.json >/tmp/e 2>&1';
-			$script .= "\n";
-			$script .= 'php ' . realpath(dirname(__FILE__)) . '/update_runid.php \'' . $scriptId . '\' /tmp/out_' . $scriptId . '.json';
-			file_put_contents('/home/oacis/rrs-oacis/oacis-queue/scripts/' . $scriptId, $script);
-			exec('nohup /home/oacis/rrs-oacis/oacis-queue/main.pl ' . $scriptId . ' > /dev/null &');
-		}
-
-		return true;
-	}
-
-
-	/**
-	 *
-	 * */
 	private static function connectDB()
 	{
 		$db = DatabaseManager::getDatabase();
@@ -544,7 +534,7 @@ class BaseManager
 			$db->query("create table replaceSetsParameter(replaceSets, parameter);");
 			$db->query("create table replaceSet(id integer primary key, replaceSets);");
 			$db->query("create table replace(id integer primary key, replaceSet, parameter, value);");
-			$db->query("create table run(id integer primary key, name, paramId, runId, state default -10, replaceSetArray default '', score);");
+			$db->query("create table run(id integer primary key, name, base, paramId, runId, state default -10, replaceSetArray default '', score);");
 		}
 
 		if ($dbVersion != $version)

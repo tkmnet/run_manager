@@ -9,9 +9,13 @@ class MainPage extends AbstractPage
 {
 	private $bases;
 	private $base = null;
+	private $cmd = '';
 	public function controller($params)
 	{
 		if (count($params) >= 1) {
+			if (count($params) >= 2) {
+				$this->cmd = $params[1];
+			}
 			$this->base = BaseManager::getBase($params[0]);
 		} else {
 			$this->bases = BaseManager::getBases();
@@ -22,20 +26,63 @@ class MainPage extends AbstractPage
 
 	function body()
 	{
-		if ($this->base != null) {
-			self::writeContentHeader($this->base["name"],"Run Manager", ["<a href='../run_manager'>Run Manager</a>"]);
-			self::beginContent();
+		if ($this->cmd === "runlist") {
+			self::writeContentHeader("RunList", $this->base["name"], [
+				"<a href='../../run_manager'>Run Manager</a>",
+				"<a href='../../run_manager/".$this->base["name"]."'>".$this->base["name"]."</a>"]);
+			$this->printRunList();
+		} else if ($this->base != null) {
+			self::writeContentHeader($this->base["name"],"Run Manager", ["<a href='../../run_manager'>Run Manager</a>"]);
 			$this->printBasePage();
 		} else {
 			self::writeContentHeader("Run Manager");
-			self::beginContent();
 			$this->printBaseList();
 		}
+	}
+
+	function printRunList()
+	{
+		$pendingRuns = BaseManager::getPendingRunList($this->base["name"], 0, 10);
+		self::beginContent();
+		?>
+		<div class="row">
+			<div class="col-xs-12">
+				<div class="box box-success">
+					<div class="box-header">
+						<h3 class="box-title">Pending Run List</h3>
+						<div class="box-tools">
+						</div>
+					</div>
+					<!-- /.box-header -->
+					<div class="box-body table-responsive no-padding">
+						<table class="table">
+							<tr>
+								<th>Name</th>
+								<th>ReplaceSetArray</th>
+								<th></th>
+							</tr>
+							<?php foreach ($pendingRuns as $run) { ?>
+								<tr>
+									<td><?= $run["name"] ?></td>
+									<td><?= $run["replaceSetArray"] ?></td>
+									<td><button class="btn btn-xs btn-warning" onclick="location.href='../../run_manager-control/reserve/<?= $run["name"] ?>'">
+											<i class="fa fa-arrow-right"></i> Reserve</button></td>
+								</tr>
+							<?php } ?>
+						</table>
+					</div>
+					<!-- /.box-body -->
+				</div>
+				<!-- /.box -->
+			</div>
+		</div>
+		<?php
 		self::endContent();
 	}
 
 	function printBasePage()
 	{
+		self::beginContent();
 		?>
 		<div class="row">
 			<div class="col-xs-12">
@@ -43,6 +90,8 @@ class MainPage extends AbstractPage
 					<div class="box-header">
 						<h3 class="box-title"><?= $this->base["alias"] ?></h3>
 						<div class="box-tools">
+							<button class="btn btn-success" onclick="location.href='./<?= $this->base["name"] ?>/runlist'">RunList</button>
+							<button class="btn btn-default" onclick="window.open('http://'+location.host.replace(location.port,3000)+'/simulators/<?= $this->base["name"] ?>');">OACIS</button>
 						</div>
 					</div>
 					<!-- /.box-header -->
@@ -116,10 +165,12 @@ class MainPage extends AbstractPage
 		}
 		?>
 		<?php
+		self::endContent();
 	}
 
 	function printBaseList()
 	{
+		self::beginContent();
 		?>
 		<div class="row">
 			<div class="col-xs-12">
@@ -154,5 +205,6 @@ class MainPage extends AbstractPage
 			</div>
 		</div>
 		<?php
+		self::endContent();
 	}
 }
