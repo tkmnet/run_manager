@@ -91,7 +91,7 @@ class BaseManager
 		return $base;
 	}
 
-	public static function addBase($alias, $note, $map, $agent_a, $agent_f, $agent_p, $is_mod, $is_dev, $mods, $devs)
+	public static function addBase($alias, $note, $map, $agent_a, $agent_f, $agent_p, $use_prec, $is_mod, $is_dev, $mods, $devs)
 	{
 		$tmpFileOut = '/tmp/rrsoacis-out-' . uniqid();
 		$tmpFileIn = '/tmp/rrsoacis-in-' . uniqid();
@@ -99,7 +99,7 @@ class BaseManager
 		$simulator = json_decode(file_get_contents($tmpFileOut), true);
 		system("rm -f " . $tmpFileOut);
 		$simulator['name'] = "RO_tkmnetRM_" . uniqid();
-		$simulator['command'] = 'WD=`pwd`;cd ..;/home/oacis/rrs-oacis/rrsenv/script/rrscluster run -i ${WD}/_input.json -l ${WD}';
+		$simulator['command'] = '/home/oacis/rrs-oacis/rrsenv/script/rrscluster run -c ../rrscluster.cfg -i ./_input.json -l ./';
 		$simulator['executable_on_ids'][] = ClusterManager::getMainHostGroup();
 		$simulator['support_input_json'] = true;
 
@@ -130,6 +130,13 @@ class BaseManager
 		$parameter1['key'] = 'AGENT_P';
 		$parameter1['type'] = 'String';
 		$parameter1['default'] = '';
+		$parameter1['description'] = '';
+		$simulator['parameter_definitions'][] = $parameter1;
+
+		$parameter1 = [];
+		$parameter1['key'] = 'USE_PREC';
+		$parameter1['type'] = 'String';
+		$parameter1['default'] = '0';
 		$parameter1['description'] = '';
 		$simulator['parameter_definitions'][] = $parameter1;
 
@@ -190,6 +197,7 @@ class BaseManager
 		self::addParameterToDB($db, $baseId, "AGENT_A", $agent_a);
 		self::addParameterToDB($db, $baseId, "AGENT_F", $agent_f);
 		self::addParameterToDB($db, $baseId, "AGENT_P", $agent_p);
+		self::addParameterToDB($db, $baseId, "USE_PREC", $use_prec);
 		self::addParameterToDB($db, $baseId, "IS_MOD", $is_mod);
 		self::addParameterToDB($db, $baseId, "IS_DEV", $is_dev);
 

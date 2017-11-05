@@ -29,7 +29,7 @@ class AddBasePage extends AbstractPage
 				}
 
 				BaseManager::addBase($_POST["alias"], $_POST["note"],
-					$_POST["map"], $_POST["agent_a"], $_POST["agent_f"], $_POST["agent_p"],
+					$_POST["map"], $_POST["agent_a"], $_POST["agent_f"], $_POST["agent_p"], $_POST["use_prec"],
 					$_POST["is_mod"], $_POST["is_dev"], $mods, $devs);
 
 				header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager');
@@ -115,6 +115,24 @@ class AddBasePage extends AbstractPage
 						</div>
 						<div class="col-sm-5">
 							<input type="text" class="form-control" name="agent_p" placeholder='Default value'>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="use_prec_text" class="col-sm-2 control-label">Enable Precompute</label>
+						<div class="col-sm-5">
+							<input type="text" class="form-control" name="use_prec_text" value="USE_PREC" readonly>
+						</div>
+						<div class="col-sm-5">
+							<label class="radio-inline">
+								<input type="radio" class="" name="use_prec" value="" checked="checked">Empty
+							</label>
+							<label class="radio-inline">
+								<input type="radio" class="" name="use_prec" value="1">TRUE
+							</label>
+							<label class="radio-inline">
+								<input type="radio" class="" name="use_prec" value="0">FALSE
+							</label>
 						</div>
 					</div>
 
