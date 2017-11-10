@@ -156,7 +156,7 @@ class BaseManager
 
 		foreach ($mods as $mod) {
 			$parameter1 = [];
-			$parameter1['key'] = 'MOD_'.preg_replace('\.', '__DOT__', $mod[0]);
+			$parameter1['key'] = 'MOD_'.str_replace('.', '__DOT__', $mod[0]);
 			$parameter1['type'] = 'String';
 			$parameter1['default'] = '';
 			$parameter1['description'] = '';
@@ -165,7 +165,7 @@ class BaseManager
 
 		foreach ($devs as $dev) {
 			$parameter1 = [];
-			$parameter1['key'] = 'DEV_'.preg_replace('\.', '__DOT__', $dev[0]);
+			$parameter1['key'] = 'DEV_'.str_replace('.', '__DOT__', $dev[0]);
 			$parameter1['type'] = 'String';
 			$parameter1['default'] = '';
 			$parameter1['description'] = '';
@@ -378,11 +378,11 @@ class BaseManager
 			$input = "";
 			foreach ($run["params"] as $param) {
 				if ($input !== "") { $input .= ","; }
-				$input .='"'.$param[0].'":"'.$param[1].'"';
+				$input .='"'.str_replace('.', '__DOT__', $param[0]).'":"'.$param[1].'"';
 			}
 			foreach (self::getDefaultParameters($run["baseName"]) as $param) {
 				if ($input !== "") { $input .= ","; }
-				$input .='"'.$param[0].'":"'.$param[1].'"';
+				$input .='"'.str_replace('.', '__DOT__', $param[0]).'":"'.$param[1].'"';
 			}
 
 			$out_filename = '/tmp/out_' . $scriptId . '.json';
