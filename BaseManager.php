@@ -156,7 +156,7 @@ class BaseManager
 
 		foreach ($mods as $mod) {
 			$parameter1 = [];
-			$parameter1['key'] = 'MOD_'.$mod[0];
+			$parameter1['key'] = 'MOD_'.preg_replace('\.', '__DOT__', $mod[0]);
 			$parameter1['type'] = 'String';
 			$parameter1['default'] = '';
 			$parameter1['description'] = '';
@@ -165,7 +165,7 @@ class BaseManager
 
 		foreach ($devs as $dev) {
 			$parameter1 = [];
-			$parameter1['key'] = 'DEV_'.$dev[0];
+			$parameter1['key'] = 'DEV_'.preg_replace('\.', '__DOT__', $dev[0]);
 			$parameter1['type'] = 'String';
 			$parameter1['default'] = '';
 			$parameter1['description'] = '';

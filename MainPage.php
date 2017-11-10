@@ -110,6 +110,12 @@ class MainPage extends AbstractPage
 						</table>
 					</div>
 					<!-- /.box-body -->
+					<div class="box-footer">
+						<div class="text-right">
+							Number of run : <?= 1 ?>
+							<button class="btn btn-xs btn-primary" onclick=""><i class="fa fa-plus"></i></button>
+						</div>
+					</div>
 				</div>
 				<!-- /.box -->
 			</div>
@@ -120,7 +126,7 @@ class MainPage extends AbstractPage
 			<div class="col-xs-12">
 				<div class="box box-primary">
 					<div class="box-header">
-						<h3 class="box-title">replaceSets <?= $setsCount++ ?></h3>
+						<h3 class="box-title">ReplaceSets <?= $setsCount++ ?></h3>
 						<div class="box-tools">
 							<button class="btn btn-default"
 											onclick="location.href='../run_manager-add_rep/<?= $this->base["name"] ?>/<?= $sets["id"] ?>'">
