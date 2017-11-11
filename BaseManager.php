@@ -299,7 +299,7 @@ class BaseManager
 		$sth->execute();
 		$insertedCount = 0;
 		while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
-			$value = (isset($values[$row["name"]]) ? $values[$row["name"]] : "");
+			$value = (isset($values[str_replace('.', '__DOT__', $row["name"])]) ? $values[str_replace('.', '__DOT__', $row["name"])] : "");
 			$sth2 = $db->prepare("insert into replace(replaceSet, parameter, value) values(:replaceSet, :parameter, :value);");
 			$sth2->bindValue(':replaceSet', $replaceSet, PDO::PARAM_INT);
 			$sth2->bindValue(':parameter', $row["id"], PDO::PARAM_INT);
@@ -389,7 +389,7 @@ class BaseManager
 
 			$command = Config::$OACISCLI_PATH . " create_parameter_sets";
 			$command .= ' -s ' . $simulatorName;
-			$command .= ' -i \\\'{'.$input.',"IS_MOD":"0","IS_DEV":"0"}\\\'';
+			$command .= ' -i \\\'{'.$input.'}\\\'';
 			$command .= ' -r \\\'{"num_runs":1,"mpi_procs":0,"omp_threads":0,"priority":1,"submitted_to":"' . ClusterManager::getMainHostGroup() . '","host_parameters":null}\\\'';
 			$command .= ' -o ' . $out_filename;
 

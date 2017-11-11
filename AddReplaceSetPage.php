@@ -74,7 +74,7 @@ class AddReplaceSetPage extends AbstractPage
 								<input type="text" class="form-control" name="KEY-<?= $param["name"] ?>" value="<?= $param["name"] ?>" readonly>
 							</div>
 							<div class="col-sm-6">
-								<input type="text" class="form-control" name="<?= $param["name"] ?>" placeholder='Value' required>
+								<input type="text" class="form-control" name="<?= str_replace('.', '__DOT__', $param["name"]) ?>" placeholder='Value' required>
 							</div>
 						</div>
 					<?php } ?>
