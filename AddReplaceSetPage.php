@@ -11,6 +11,7 @@ class AddReplaceSetPage extends AbstractPage
 {
 	private $base = null;
 	private $replaceSets = null;
+
 	public function controller($params)
 	{
 		if (count($params) == 3) {
@@ -25,7 +26,7 @@ class AddReplaceSetPage extends AbstractPage
 			if ($params[2] === "add" && $this->replaceSets != null) {
 				BaseManager::addReplaceSet($this->base["name"], $this->replaceSets["id"], $_POST);
 
-				header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[0]);
+				header('location: ' . Config::$TOP_PATH . 'app/tkmnet/run_manager/' . $params[0]);
 				return;
 			}
 		} else if (count($params) == 2) {
@@ -39,16 +40,17 @@ class AddReplaceSetPage extends AbstractPage
 
 			$this->setTitle("Run Manager");
 			$this->printPage();
+			return;
 		}
 
-		header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager');
+		header('location: ' . Config::$TOP_PATH . 'app/tkmnet/run_manager');
 	}
 
 	function body()
 	{
-		self::writeContentHeader("Add ReplaceSet", $this->base["name"]."/".$this->replaceSets["id"], [
+		self::writeContentHeader("Add ReplaceSet", $this->base["name"] . "/" . $this->replaceSets["id"], [
 			"<a href='../../run_manager'>Run Manager</a>",
-			"<a href='../../run_manager/".$this->base["name"]."'>".$this->base["name"]."</a>"]);
+			"<a href='../../run_manager/" . $this->base["name"] . "'>" . $this->base["name"] . "</a>"]);
 
 		self::beginContent();
 		$this->printReplaceSetsForm();
@@ -73,7 +75,8 @@ class AddReplaceSetPage extends AbstractPage
 					<?php foreach ($this->replaceSets["parameters"] as $param) { ?>
 						<div class="form-group">
 							<div class="col-sm-6">
-								<input type="text" class="form-control" name="KEY-<?= $param["name"] ?>" value="<?= $param["name"] ?>" readonly>
+								<input type="text" class="form-control" name="KEY-<?= $param["name"] ?>" value="<?= $param["name"] ?>"
+											 readonly>
 							</div>
 							<div class="col-sm-6">
 								<?php if ($param["name"] === "MAP") { ?>
@@ -83,14 +86,14 @@ class AddReplaceSetPage extends AbstractPage
 											<option><?= $map["name"] ?></option>
 										<?php } ?>
 									</select>
-								<?php } else if ($param["name"] === "AGENT_A" || $param["name"] === "AGENT_F" || $param["name"] === "AGENT_P" ) { ?>
+								<?php } else if ($param["name"] === "AGENT_A" || $param["name"] === "AGENT_F" || $param["name"] === "AGENT_P") { ?>
 									<select class="form-control" name="<?= $param["name"] ?>" required>
 										<option value="">Value</option>
 										<?php foreach (AgentManager::getAgents() as $agent) { ?>
 											<option><?= $agent["name"] ?></option>
 										<?php } ?>
 									</select>
-								<?php } else if ($param["name"] === "USE_PREC" || $param["name"] === "IS_MOD" || $param["name"] === "IS_DEV" ) { ?>
+								<?php } else if ($param["name"] === "USE_PREC" || $param["name"] === "IS_MOD" || $param["name"] === "IS_DEV") { ?>
 									<label class="radio-inline">
 										<input type="radio" class="" name="<?= $param["name"] ?>" value="1" checked>TRUE
 									</label>
@@ -100,7 +103,8 @@ class AddReplaceSetPage extends AbstractPage
 								<?php } else {
 									$name = str_replace('.', '__DOT__', $param["name"]);
 									?>
-									<input type="text" class="form-control" name="<?= $name ?>" list="L_<?= $name ?>" placeholder='Value' required>
+									<input type="text" class="form-control" name="<?= $name ?>" list="L_<?= $name ?>" placeholder='Value'
+												 required>
 									<datalist id="L_<?= $name ?>">
 										<?php foreach (BaseManager::getDict(preg_replace("/^(MOD|DEV)_/", "", $param["name"])) as $val) { ?>
 											<option><?= $val ?></option>
