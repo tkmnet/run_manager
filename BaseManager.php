@@ -498,6 +498,34 @@ class BaseManager
 		return $runs;
 	}
 
+	public static function addDict($name, $value)
+	{
+		if ($name === null || $value === null || $name === "" || $value === "") { return; }
+
+		$db = self::connectDB();
+		$sth = $db->prepare("select count(*) as cnt from dict where name=:name and value=:value;");
+		$sth->bindValue(':name', $name, PDO::PARAM_STR);
+		$sth->bindValue(':value', $value, PDO::PARAM_STR);
+		$sth->execute();
+		if ($sth->fetch(PDO::FETCH_ASSOC)["cnt"] > 0) { return; }
+		$sth = $db->prepare("insert into dict(name, value) values(:name, :value);");
+		$sth->bindValue(':name', $name, PDO::PARAM_STR);
+		$sth->bindValue(':value', $value, PDO::PARAM_STR);
+		$sth->execute();
+	}
+
+	public static function getDict($name)
+	{
+		$db = self::connectDB();
+		$sth = $db->prepare("select value from dict where name=:name;");
+		$sth->bindValue(':name', $name, PDO::PARAM_STR);
+		$sth->execute();
+		$results = [];
+		while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
+			$results[] = $row["value"];
+		}
+		return $results;
+	}
 
 	private static function connectDB()
 	{
@@ -522,6 +550,10 @@ class BaseManager
 			$db->query("create table replaceSet(id integer primary key, replaceSets);");
 			$db->query("create table replace(id integer primary key, replaceSet, parameter, value);");
 			$db->query("create table run(id integer primary key, name, base, paramId, runId, state default -10, replaceSetArray default '', score);");
+		}
+		if ($dbVersion <= $version++ )
+		{
+			$db->query("create table dict(id integer primary key, name, value);");
 		}
 
 		if ($dbVersion != $version)

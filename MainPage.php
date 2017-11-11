@@ -213,4 +213,25 @@ class MainPage extends AbstractPage
 		<?php
 		self::endContent();
 	}
+
+	function footer()
+	{
+		?>
+		<footer class="main-footer">
+			<a href="./run_manager-add_dict">
+				<i class="fa fa-book"></i> Dict
+			</a>
+			<div class="pull-right hidden-xs">
+				<b>Version</b> <?= Config::APP_VERSION ?>
+			</div>
+			<br>
+		</footer>
+		<!-- =============================================== -->
+		</div>
+		<!-- ./wrapper -->
+		<?php include Config::$SRC_REAL_URL . 'component/common/footerscript.php';?>
+		</body>
+		</html>
+		<?php
+	}
 }

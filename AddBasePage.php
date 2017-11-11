@@ -3,6 +3,8 @@
 namespace rrsoacis\apps\tkmnet\run_manager;
 
 use rrsoacis\component\common\AbstractPage;
+use rrsoacis\manager\AgentManager;
+use rrsoacis\manager\MapManager;
 use rrsoacis\system\Config;
 
 class AddBasePage extends AbstractPage
@@ -84,7 +86,12 @@ class AddBasePage extends AbstractPage
 							<input type="text" class="form-control" name="map_text" value="MAP" readonly>
 						</div>
 						<div class="col-sm-5">
-							<input type="text" class="form-control" name="map" placeholder='Default value'>
+							<select class="form-control" name="map">
+								<option value="">Value</option>
+								<?php foreach (MapManager::getMaps() as $map) { ?>
+									<option><?= $map["name"] ?></option>
+								<?php } ?>
+							</select>
 						</div>
 					</div>
 
@@ -94,7 +101,12 @@ class AddBasePage extends AbstractPage
 							<input type="text" class="form-control" name="agent_a_text" value="AGENT_A" readonly>
 						</div>
 						<div class="col-sm-5">
-							<input type="text" class="form-control" name="agent_a" placeholder='Default value'>
+							<select class="form-control" name="agent_a">
+								<option value="">Value</option>
+								<?php foreach (AgentManager::getAgents() as $agent) { ?>
+									<option><?= $agent["name"] ?></option>
+								<?php } ?>
+							</select>
 						</div>
 					</div>
 
@@ -104,7 +116,12 @@ class AddBasePage extends AbstractPage
 							<input type="text" class="form-control" name="agent_f_text" value="AGENT_F" readonly>
 						</div>
 						<div class="col-sm-5">
-							<input type="text" class="form-control" name="agent_f" placeholder='Default value'>
+							<select class="form-control" name="agent_f">
+								<option value="">Value</option>
+								<?php foreach (AgentManager::getAgents() as $agent) { ?>
+									<option><?= $agent["name"] ?></option>
+								<?php } ?>
+							</select>
 						</div>
 					</div>
 
@@ -114,7 +131,12 @@ class AddBasePage extends AbstractPage
 							<input type="text" class="form-control" name="agent_p_text" value="AGENT_P" readonly>
 						</div>
 						<div class="col-sm-5">
-							<input type="text" class="form-control" name="agent_p" placeholder='Default value'>
+							<select class="form-control" name="agent_p">
+								<option value="">Value</option>
+								<?php foreach (AgentManager::getAgents() as $agent) { ?>
+									<option><?= $agent["name"] ?></option>
+								<?php } ?>
+							</select>
 						</div>
 					</div>
 
@@ -175,26 +197,61 @@ class AddBasePage extends AbstractPage
 					<script type="text/javascript">
 						var modCount = 0;
 						var devCount = 0;
+
+						var backupFeildName = [];
+						var backupFeildValue = [];
+
+						var backupFields = function () {
+							for (i = 0; i < backupFeildName.length; i++) {
+								backupFeildValue[i] = document.getElementById(backupFeildName[i]).value;
+							}
+						}
+
+						var loadFields = function () {
+							for (i = 0; i < backupFeildName.length; i++) {
+								document.getElementById(backupFeildName[i]).value = backupFeildValue[i];
+							}
+						}
+
 						var addMod = function () {
+							backupFields();
 							params = document.getElementById("params");
 							params.innerHTML += '<div class="form-group"><label for="mod' + modCount
 								+ '" class="col-sm-2 control-label">MOD_</label><div class="col-sm-5">'
-								+ '<input type="text" class="form-control" name="mod' + modCount + '" placeholder="Name" required>'
-								+ '</div><div class="col-sm-5"><input type="text" class="form-control" name="mod_def'
-								+ modCount + '" placeholder="Default value"></div></div>';
+								+ '<input type="text" list="L_MOD" class="form-control" id="mod' + modCount + '" name="mod' + modCount + '" placeholder="Name" required>'
+								+ '</div><div class="col-sm-5"><input type="text" class="form-control" id="mod_def' + modCount
+								+ '" name="mod_def' + modCount + '" placeholder="Default value"></div></div>';
+							loadFields();
+							backupFeildName.push('mod' + modCount);
+							backupFeildName.push('mod_def' + modCount);
 							modCount++;
 						}
 
 						var addDev = function () {
+							backupFields();
 							params = document.getElementById("params");
 							params.innerHTML += '<div class="form-group"><label for="dev' + devCount
 								+ '" class="col-sm-2 control-label">DEV_</label><div class="col-sm-5">'
-								+ '<input type="text" class="form-control" name="dev' + devCount + '" placeholder="Name" required>'
-								+ '</div><div class="col-sm-5"><input type="text" class="form-control" name="dev_def'
-								+ devCount + '" placeholder="Default value"></div></div>';
+								+ '<input type="text" list="L_DEV" class="form-control" id="dev' + devCount + '" name="dev' + devCount + '" placeholder="Name" required>'
+								+ '</div><div class="col-sm-5"><input type="text" class="form-control" id= "dev_def' + devCount
+								+ '" name="dev_def' + devCount + '" placeholder="Default value"></div></div>';
+							loadFields();
+							backupFeildName.push('dev' + devCount);
+							backupFeildName.push('dev_def' + devCount);
 							devCount++;
 						}
 					</script>
+
+					<datalist id="L_MOD">
+						<?php foreach (BaseManager::getDict("MOD") as $val) { ?>
+						<option><?= $val ?></option>
+						<?php } ?>
+					</datalist>
+					<datalist id="L_DEV">
+						<?php foreach (BaseManager::getDict("DEV") as $val) { ?>
+							<option><?= $val ?></option>
+						<?php } ?>
+					</datalist>
 
 					<div id="params">
 					</div>
@@ -219,100 +276,6 @@ class AddBasePage extends AbstractPage
 			</div>
 		</div>
 		<!-- /.box -->
-
-		<script>
-
-			document.addEventListener("adf_add_agent", function () {
-				getAgentParameterList();
-			}, false);
-
-			document.addEventListener("adf_add_map", function () {
-				getAgentParameterList();
-			}, false);
-
-
-			$(function () {
-				getAgentParameterList();
-				getMapParameterList();
-
-				$(".select2").select2();
-
-				$(".select2-search__field").css({'padding': '0px 6px', "border": "none"});
-
-			});
-
-			function getAgentParameterList() {
-
-				fetch('<?= Config::$TOP_PATH ?>agents_get', {
-					method: 'GET', credentials: "include"
-				})
-					.then(function (response) {
-						return response.json()
-					})
-					.then(function (json) {
-
-						setAgentListOptionData(json);
-
-					});
-
-			}
-
-
-			function setAgentListOptionData(date) {
-
-				var tb = document.querySelector('#agent_keyword');
-				while (child = tb.lastChild) tb.removeChild(child);
-
-				for (var i = 0; i < date.length; i++) {
-
-
-					var t = document.querySelector('#agent_keyword_option');
-
-					t.content.querySelector('option').value = date[i]['name'] + '_' + date[i]['uuid'];
-
-					var clone = document.importNode(t.content, true);
-					tb.appendChild(clone);
-				}
-
-			}
-
-			//Map
-			function getMapParameterList() {
-
-				fetch('<?= Config::$TOP_PATH ?>maps_get', {
-					method: 'GET', credentials: "include"
-				})
-					.then(function (response) {
-						return response.json()
-					})
-					.then(function (json) {
-
-						setMapListOptionData(json);
-
-					});
-
-			}
-
-
-			function setMapListOptionData(data) {
-
-				var tb = document.querySelector('#map_keyword');
-				while (child = tb.lastChild) tb.removeChild(child);
-
-				for (var i = 0; i < data.length; i++) {
-
-
-					var t = document.querySelector('#map_keyword_option');
-
-					t.content.querySelector('option').value = data[i]['name'] + '_' + data[i]['uuid'];
-
-					var clone = document.importNode(t.content, true);
-					tb.appendChild(clone);
-				}
-
-			}
-
-		</script>
 		<?php
 	}
 }

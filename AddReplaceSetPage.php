@@ -3,6 +3,8 @@
 namespace rrsoacis\apps\tkmnet\run_manager;
 
 use rrsoacis\component\common\AbstractPage;
+use rrsoacis\manager\AgentManager;
+use rrsoacis\manager\MapManager;
 use rrsoacis\system\Config;
 
 class AddReplaceSetPage extends AbstractPage
@@ -74,7 +76,37 @@ class AddReplaceSetPage extends AbstractPage
 								<input type="text" class="form-control" name="KEY-<?= $param["name"] ?>" value="<?= $param["name"] ?>" readonly>
 							</div>
 							<div class="col-sm-6">
-								<input type="text" class="form-control" name="<?= str_replace('.', '__DOT__', $param["name"]) ?>" placeholder='Value' required>
+								<?php if ($param["name"] === "MAP") { ?>
+									<select class="form-control" name="<?= $param["name"] ?>" required>
+										<option value="">Value</option>
+										<?php foreach (MapManager::getMaps() as $map) { ?>
+											<option><?= $map["name"] ?></option>
+										<?php } ?>
+									</select>
+								<?php } else if ($param["name"] === "AGENT_A" || $param["name"] === "AGENT_F" || $param["name"] === "AGENT_P" ) { ?>
+									<select class="form-control" name="<?= $param["name"] ?>" required>
+										<option value="">Value</option>
+										<?php foreach (AgentManager::getAgents() as $agent) { ?>
+											<option><?= $agent["name"] ?></option>
+										<?php } ?>
+									</select>
+								<?php } else if ($param["name"] === "USE_PREC" || $param["name"] === "IS_MOD" || $param["name"] === "IS_DEV" ) { ?>
+									<label class="radio-inline">
+										<input type="radio" class="" name="<?= $param["name"] ?>" value="1" checked>TRUE
+									</label>
+									<label class="radio-inline">
+										<input type="radio" class="" name="<?= $param["name"] ?>" value="0">FALSE
+									</label>
+								<?php } else {
+									$name = str_replace('.', '__DOT__', $param["name"]);
+									?>
+									<input type="text" class="form-control" name="<?= $name ?>" list="L_<?= $name ?>" placeholder='Value' required>
+									<datalist id="L_<?= $name ?>">
+										<?php foreach (BaseManager::getDict(preg_replace("/^(MOD|DEV)_/", "", $param["name"])) as $val) { ?>
+											<option><?= $val ?></option>
+										<?php } ?>
+									</datalist>
+								<?php } ?>
 							</div>
 						</div>
 					<?php } ?>
