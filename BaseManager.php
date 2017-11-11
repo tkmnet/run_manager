@@ -498,6 +498,18 @@ class BaseManager
 		return $runs;
 	}
 
+	public static function getDictText()
+	{
+		$db = self::connectDB();
+		$sth = $db->prepare("select name,value from dict;");
+		$sth->execute();
+		$result = "";
+		while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
+			$result .= $row["name"].":".$row["value"]."\n";
+		}
+		return $result;
+	}
+
 	public static function addDict($name, $value)
 	{
 		if ($name === null || $value === null || $name === "" || $value === "") { return; }

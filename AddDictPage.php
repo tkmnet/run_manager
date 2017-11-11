@@ -28,6 +28,10 @@ class AddDictPage extends AbstractPage
 
 				header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager-add_dict');
 				return;
+			} else if ($params[0] === "gettxt") {
+				header('Content-Type: text/plain;');
+				echo BaseManager::getDictText();
+				return;
 			}
 		}
 
