@@ -26,6 +26,11 @@ class ControlPage extends AbstractPage
 				header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$run["baseName"].'/runlist');
 				return;
 			}
+		} elseif ($cmd === "postall") {
+			$pendingRuns = BaseManager::getPendingRunList($params[1], 0, -1);
+			foreach ($pendingRuns as $run) {
+				BaseManager::postRunToOACIS($run["name"]);
+			}
 		}
 
 		header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager');
