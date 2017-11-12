@@ -31,6 +31,8 @@ class ControlPage extends AbstractPage
 			foreach ($pendingRuns as $run) {
 				BaseManager::postRunToOACIS($run["name"]);
 			}
+			header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[1].'/runlist');
+			return;
 		}
 
 		header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager');
