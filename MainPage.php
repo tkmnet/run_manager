@@ -51,6 +51,8 @@ class MainPage extends AbstractPage
 					<div class="box-header">
 						<h3 class="box-title">Pending Run List</h3>
 						<div class="box-tools">
+							<button class="btn btn-info" onclick="location.href='../../run_manager-control/postall/<?= $this->base["name"] ?>'">
+								<i class="fa fa-arrow-right"></i> Post all</button>
 						</div>
 					</div>
 					<!-- /.box-header -->
