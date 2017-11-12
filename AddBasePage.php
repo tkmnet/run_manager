@@ -218,7 +218,7 @@ class AddBasePage extends AbstractPage
 							params = document.getElementById("params");
 							params.innerHTML += '<div class="form-group"><label for="mod' + modCount
 								+ '" class="col-sm-2 control-label">MOD_</label><div class="col-sm-5">'
-								+ '<input type="text" list="L_MOD" class="form-control" id="mod' + modCount + '" name="mod' + modCount + '" placeholder="Name" required>'
+								+ '<input type="text" list="L_MOD" autocomplete="off" class="form-control" id="mod' + modCount + '" name="mod' + modCount + '" placeholder="Name" required>'
 								+ '</div><div class="col-sm-5"><input type="text" class="form-control" id="mod_def' + modCount
 								+ '" name="mod_def' + modCount + '" placeholder="Default value"></div></div>';
 							loadFields();
@@ -232,7 +232,7 @@ class AddBasePage extends AbstractPage
 							params = document.getElementById("params");
 							params.innerHTML += '<div class="form-group"><label for="dev' + devCount
 								+ '" class="col-sm-2 control-label">DEV_</label><div class="col-sm-5">'
-								+ '<input type="text" list="L_DEV" class="form-control" id="dev' + devCount + '" name="dev' + devCount + '" placeholder="Name" required>'
+								+ '<input type="text" list="L_DEV" autocomplete="off" class="form-control" id="dev' + devCount + '" name="dev' + devCount + '" placeholder="Name" required>'
 								+ '</div><div class="col-sm-5"><input type="text" class="form-control" id= "dev_def' + devCount
 								+ '" name="dev_def' + devCount + '" placeholder="Default value"></div></div>';
 							loadFields();

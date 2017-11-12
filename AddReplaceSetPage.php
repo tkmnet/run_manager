@@ -103,7 +103,7 @@ class AddReplaceSetPage extends AbstractPage
 								<?php } else {
 									$name = str_replace('.', '__DOT__', $param["name"]);
 									?>
-									<input type="text" class="form-control" name="<?= $name ?>" list="L_<?= $name ?>" placeholder='Value'
+									<input type="text" class="form-control" name="<?= $name ?>" autocomplete="off" list="L_<?= $name ?>" placeholder='Value'
 												 required>
 									<datalist id="L_<?= $name ?>">
 										<?php foreach (BaseManager::getDict(preg_replace("/^(MOD|DEV)_/", "", $param["name"])) as $val) { ?>
