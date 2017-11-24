@@ -220,9 +220,15 @@ class MainPage extends AbstractPage
 	{
 		?>
 		<footer class="main-footer">
-			<a href="./run_manager-add_dict">
-				<i class="fa fa-book"></i> Dict
-			</a>
+			<?php if ($this->base === null) { ?>
+				<a href="./run_manager-add_dict">
+					<i class="fa fa-book"></i> Dict
+				</a>
+			<?php } else { ?>
+				<a href="../run_manager-control/duplicate_base/<?= $this->base["name"] ?>">
+					<i class="fa fa-clone"></i> Duplicate Base
+				</a>
+			<?php } ?>
 			<div class="pull-right hidden-xs">
 				<b>Version</b> <?= Config::APP_VERSION ?>
 			</div>

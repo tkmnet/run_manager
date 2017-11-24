@@ -539,6 +539,130 @@ class BaseManager
 		return $results;
 	}
 
+	public static function duplicateBase($name)
+	{
+		$base = self::getBase($name);
+		if ($base !== null) {
+			$tmpFileOut = '/tmp/rrsoacis-out-' . uniqid();
+			$tmpFileIn = '/tmp/rrsoacis-in-' . uniqid();
+			system("sudo -i -u oacis " . Config::$OACISCLI_PATH . " simulator_template -o " . $tmpFileOut . " 2>&1");
+			$simulator = json_decode(file_get_contents($tmpFileOut), true);
+			system("rm -f " . $tmpFileOut);
+			$simulator['name'] = "RO_tkmnetRM_" . uniqid();
+			$simulator['command'] = '/home/oacis/rrs-oacis/rrsenv/script/rrscluster run -c ../rrscluster.cfg -i ./_input.json -l ./';
+			$simulator['executable_on_ids'][] = ClusterManager::getMainHostGroup();
+			$simulator['support_input_json'] = true;
+
+			$simulator['parameter_definitions'] = [];
+
+			$parameter1 = [];
+			$parameter1['key'] = 'MAP';
+			$parameter1['type'] = 'String';
+			$parameter1['default'] = '';
+			$parameter1['description'] = '';
+			$simulator['parameter_definitions'][] = $parameter1;
+
+			$parameter1 = [];
+			$parameter1['key'] = 'AGENT_A';
+			$parameter1['type'] = 'String';
+			$parameter1['default'] = '';
+			$parameter1['description'] = '';
+			$simulator['parameter_definitions'][] = $parameter1;
+
+			$parameter1 = [];
+			$parameter1['key'] = 'AGENT_F';
+			$parameter1['type'] = 'String';
+			$parameter1['default'] = '';
+			$parameter1['description'] = '';
+			$simulator['parameter_definitions'][] = $parameter1;
+
+			$parameter1 = [];
+			$parameter1['key'] = 'AGENT_P';
+			$parameter1['type'] = 'String';
+			$parameter1['default'] = '';
+			$parameter1['description'] = '';
+			$simulator['parameter_definitions'][] = $parameter1;
+
+			$parameter1 = [];
+			$parameter1['key'] = 'USE_PREC';
+			$parameter1['type'] = 'String';
+			$parameter1['default'] = '0';
+			$parameter1['description'] = '';
+			$simulator['parameter_definitions'][] = $parameter1;
+
+			$parameter1 = [];
+			$parameter1['key'] = 'IS_MOD';
+			$parameter1['type'] = 'String';
+			$parameter1['default'] = '0';
+			$parameter1['description'] = '';
+			$simulator['parameter_definitions'][] = $parameter1;
+
+			$parameter1 = [];
+			$parameter1['key'] = 'IS_DEV';
+			$parameter1['type'] = 'String';
+			$parameter1['default'] = '0';
+			$parameter1['description'] = '';
+			$simulator['parameter_definitions'][] = $parameter1;
+
+			$mods = [];
+			$devs = [];
+			foreach ($base["parameters"] as $p) {
+				$pName = $p["name"];
+				if (substr($pName, 0, strlen("MOD_")) === "MOD_") {
+					$mods[] = $pName;
+				} else if (substr($pName, 0, strlen("DEV_")) === "DEV_") {
+					$devs[] = $pName;
+				}
+			}
+
+			foreach ($mods as $mod) {
+				$parameter1 = [];
+				$parameter1['key'] = str_replace('.', '__DOT__', $mod);
+				$parameter1['type'] = 'String';
+				$parameter1['default'] = '';
+				$parameter1['description'] = '';
+				$simulator['parameter_definitions'][] = $parameter1;
+			}
+
+			foreach ($devs as $dev) {
+				$parameter1 = [];
+				$parameter1['key'] = str_replace('.', '__DOT__', $dev);
+				$parameter1['type'] = 'String';
+				$parameter1['default'] = '';
+				$parameter1['description'] = '';
+				$simulator['parameter_definitions'][] = $parameter1;
+			}
+
+			file_put_contents($tmpFileIn, json_encode($simulator));
+			system("sudo -i -u oacis " . Config::$OACISCLI_PATH . " create_simulator -i " . $tmpFileIn . " -o " . $tmpFileOut);
+			system("rm -f " . $tmpFileIn);
+			$simulatorId = json_decode(file_get_contents($tmpFileOut), true)['simulator_id'];
+			system("rm -f " . $tmpFileOut);
+
+			$db = self::connectDB();
+			$sth = $db->prepare("insert into base(name, alias, note) values(:name, :alias, :note);");
+			$sth->bindValue(':name', $simulatorId, PDO::PARAM_STR);
+			$sth->bindValue(':alias', $base["alias"] . "_copy", PDO::PARAM_STR);
+			$sth->bindValue(':note', $base["note"], PDO::PARAM_STR);
+			$sth->execute();
+
+			$sth = $db->prepare("select id from base where name=:name;");
+			$sth->bindValue(':name', $simulatorId, PDO::PARAM_STR);
+			$sth->execute();
+			$baseId = 0;
+			while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
+				$baseId = $row["id"];
+			}
+
+			$sth = $db->prepare("insert into parameter select null as id, :newbase as base, name, def from parameter where base=:base;");
+			$sth->bindValue(':newbase', $baseId, PDO::PARAM_INT);
+			$sth->bindValue(':base', $base["id"], PDO::PARAM_INT);
+			$sth->execute();
+
+			return $baseId;
+		}
+	}
+
 	private static function connectDB()
 	{
 		$db = DatabaseManager::getDatabase();
