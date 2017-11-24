@@ -659,7 +659,7 @@ class BaseManager
 			$sth->bindValue(':base', $base["id"], PDO::PARAM_INT);
 			$sth->execute();
 
-			return $baseId;
+			return $simulatorId;
 		}
 	}
 
