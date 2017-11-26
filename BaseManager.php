@@ -362,7 +362,7 @@ class BaseManager
 			}
 			$sth2 = $db->prepare("insert into run(name, base, replaceSetArray) values(:name, :base, :params);");
 			$sth2->bindValue(':name', str_replace(".", "0", uniqid("",true)), PDO::PARAM_STR);
-			$sth2->bindValue(':base', $base["id"], PDO::PARAM_STR);
+			$sth2->bindValue(':base', $base["id"], PDO::PARAM_STR); //TODO: STR ---> INT
 			$sth2->bindValue(':params', $params, PDO::PARAM_STR);
 			$sth2->execute();
 		}
@@ -661,6 +661,105 @@ class BaseManager
 
 			return $simulatorId;
 		}
+	}
+
+	public static function getOacisParameterSets($run)
+	{
+		$rawData = file_get_contents('http://127.0.0.1:3000/parameter_sets/'.$run["paramId"].'.json');
+		if ($rawData === false) { return false; }
+		return json_decode($rawData);
+	}
+
+	public static function getOacisRun($run)
+	{
+		$rawData = file_get_contents('http://127.0.0.1:3000/runs/'.$run["runId"].'.json');
+		if ($rawData === false) {
+			$oacisPS = self::getOacisParameterSets($run);
+			if ($oacisPS === false) { return false; }
+			if (count($oacisPS->runs) <= 0) { return false; }
+
+			$newRunId = $oacisPS->runs[count($oacisPS->runs)-1]->id;
+
+			$db = self::connectDB();
+			$sth = $db->prepare("update run set runId=:runId where id=:id;");
+			$sth->bindValue(':id', $run["id"], PDO::PARAM_INT);
+			$sth->bindValue(':runId', $newRunId, PDO::PARAM_STR);
+			$sth->execute();
+
+			$rawData = file_get_contents('http://127.0.0.1:3000/runs/'.$newRunId.'.json');
+		}
+		return json_decode($rawData);
+	}
+
+	public static function updateScore($runName)
+	{
+		$run = self::getRun($runName);
+		if ($run !== null) {
+			$oacisRun = self::getOacisRun($run);
+			$newScore = -1;
+			if ($oacisRun !== false)
+			{
+				$newScore = $oacisRun->result->Score;
+			}
+
+			$db = self::connectDB();
+			$sth = $db->prepare("update run set score=:score where id=:id;");
+			$sth->bindValue(':id', $run["id"], PDO::PARAM_INT);
+			$sth->bindValue(':score', $newScore, PDO::PARAM_STR);
+			$sth->execute();
+		}
+	}
+
+	public static function getResultCsv($name)
+	{
+		$base = self::getBase($name);
+		if ($base !== null) {
+			$result = "";
+
+			/*
+			 * //get Default parameter
+                foreach (self::getDefaultParameters($run["baseName"]) as $param) {
+                    if ($input !== "") { $input .= ","; }
+                    $input .='"'.str_replace('.', '__DOT__', $param[0]).'":"'.$param[1].'"';
+                }
+                */
+
+			$db = self::connectDB();
+			$sth = $db->prepare("select name from run where base=:base;");
+			$sth->bindValue(':base', $base["id"], PDO::PARAM_STR); //TODO: STR ---> INT
+			$sth->execute();
+			$runNames = [];
+			while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
+				$runNames[] = $row["name"];
+			}
+
+			foreach ($runNames as $runName) {
+				self::updateScore($runName);
+				$run = self::getRun($runName);
+
+				if ($result === "") {
+					foreach ($run["params"] as $param) {
+						$result .= '"' . $param[0] . '",';
+					}
+					$result .= "\"Score\",\n";
+				}
+				foreach ($run["params"] as $param) {
+					$result .= '"' . $param[1] . '",';
+				}
+
+				$score = $run["score"];
+				if ($score !== null) {
+					$result .= $score . ",";
+				} else {
+					$result .= "-1,";
+				}
+				$result .= "\n";
+			}
+
+			return $result;
+		}
+
+		return "";
 	}
 
 	private static function connectDB()

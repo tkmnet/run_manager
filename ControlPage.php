@@ -37,6 +37,16 @@ class ControlPage extends AbstractPage
 			$newName = BaseManager::duplicateBase($params[1]);
 			header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$newName);
 			return;
+		} elseif ($cmd === "getcsv") {
+			error_reporting(0);
+			//header('Content-Type: application/zip; name="' . $zipFileName . '"');
+			header('Content-Type: text/csv;');
+			//header('Content-Disposition: attachment; filename="' . $zipFileName . '"');
+			//header('Content-Length: ' . (strlen(bin2hex($output))/2));
+			if (count($params) == 2) {
+				echo BaseManager::getResultCsv($params[1]);
+			}
+			return;
 		}
 
 		header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager');
