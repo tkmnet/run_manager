@@ -30,7 +30,7 @@ class AddBasePage extends AbstractPage
 					$devCount++;
 				}
 
-				BaseManager::addBase($_POST["alias"], $_POST["note"],
+				BaseManager::addBase($_POST["alias"], $_POST["note"], $_POST["logmode"],
 					$_POST["map"], $_POST["agent_a"], $_POST["agent_f"], $_POST["agent_p"], $_POST["use_prec"],
 					$_POST["is_mod"], $_POST["is_dev"], $mods, $devs);
 
@@ -77,6 +77,19 @@ class AddBasePage extends AbstractPage
 						<label for="note" class="col-sm-2 control-label">Note</label>
 						<div class="col-sm-10">
 							<textarea class="form-control" id="note" name="note"></textarea>
+						</div>
+					</div>
+
+					<div class="form-group">
+						<label for="logmode" class="col-sm-2 control-label">LogMode</label>
+						<div class="col-sm-5">
+							<input type="text" class="form-control" name="logmode_text" value="LOGMODE" readonly>
+						</div>
+						<div class="col-sm-5">
+							<select class="form-control" name="logmode">
+								<option>ALL</option>
+								<option>SCORE</option>
+							</select>
 						</div>
 					</div>
 

@@ -91,7 +91,7 @@ class BaseManager
 		return $base;
 	}
 
-	public static function addBase($alias, $note, $map, $agent_a, $agent_f, $agent_p, $use_prec, $is_mod, $is_dev, $mods, $devs)
+	public static function addBase($alias, $note, $logmode, $map, $agent_a, $agent_f, $agent_p, $use_prec, $is_mod, $is_dev, $mods, $devs)
 	{
 		$tmpFileOut = '/tmp/rrsoacis-out-' . uniqid();
 		$tmpFileIn = '/tmp/rrsoacis-in-' . uniqid();
@@ -137,6 +137,13 @@ class BaseManager
 		$parameter1['key'] = 'USE_PREC';
 		$parameter1['type'] = 'String';
 		$parameter1['default'] = '0';
+		$parameter1['description'] = '';
+		$simulator['parameter_definitions'][] = $parameter1;
+
+		$parameter1 = [];
+		$parameter1['key'] = 'LOGMODE';
+		$parameter1['type'] = 'String';
+		$parameter1['default'] = 'ALL';
 		$parameter1['description'] = '';
 		$simulator['parameter_definitions'][] = $parameter1;
 
@@ -208,6 +215,8 @@ class BaseManager
 		foreach ($devs as $dev) {
 			self::addParameterToDB($db, $baseId, "DEV_".$dev[0], $dev[1]);
 		}
+
+		self::addParameterToDB($db, $baseId, "LOGMODE", $logmode);
 	}
 
 	private static function addParameterToDB($db, $baseId, $name, $def)
@@ -587,6 +596,13 @@ class BaseManager
 			$parameter1['key'] = 'USE_PREC';
 			$parameter1['type'] = 'String';
 			$parameter1['default'] = '0';
+			$parameter1['description'] = '';
+			$simulator['parameter_definitions'][] = $parameter1;
+
+			$parameter1 = [];
+			$parameter1['key'] = 'LOGMODE';
+			$parameter1['type'] = 'String';
+			$parameter1['default'] = 'ALL';
 			$parameter1['description'] = '';
 			$simulator['parameter_definitions'][] = $parameter1;
 
