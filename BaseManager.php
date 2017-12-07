@@ -106,6 +106,13 @@ class BaseManager
 		$simulator['parameter_definitions'] = [];
 
 		$parameter1 = [];
+		$parameter1['key'] = 'RUN_NAME';
+		$parameter1['type'] = 'String';
+		$parameter1['default'] = '';
+		$parameter1['description'] = '';
+		$simulator['parameter_definitions'][] = $parameter1;
+
+		$parameter1 = [];
 		$parameter1['key'] = 'MAP';
 		$parameter1['type'] = 'String';
 		$parameter1['default'] = '';
@@ -360,6 +367,11 @@ class BaseManager
 		}
 		$select .= $from.";";
 
+		$sth = $db->prepare("select trial from base where name=:base;");
+		$sth->bindValue(':base', $name, PDO::PARAM_STR);
+		$sth->execute();
+		$trial = $sth->fetch(PDO::FETCH_ASSOC)["trial"];
+
 		$sth = $db->query($select);
 		while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
 			$params = "";
@@ -369,11 +381,14 @@ class BaseManager
 				}
 				$params .= $r;
 			}
-			$sth2 = $db->prepare("insert into run(name, base, replaceSetArray) values(:name, :base, :params);");
-			$sth2->bindValue(':name', str_replace(".", "0", uniqid("",true)), PDO::PARAM_STR);
-			$sth2->bindValue(':base', $base["id"], PDO::PARAM_STR); //TODO: STR ---> INT
-			$sth2->bindValue(':params', $params, PDO::PARAM_STR);
-			$sth2->execute();
+			for ($n = 0; $n < $trial; $n++) {
+				$sth2 = $db->prepare("insert into run(name, base, trial, replaceSetArray) values(:name, :base, :trial, :params);");
+				$sth2->bindValue(':name', str_replace(".", "0", uniqid("", true)), PDO::PARAM_STR);
+				$sth2->bindValue(':base', $base["id"], PDO::PARAM_STR); //TODO: STR ---> INT
+				$sth2->bindValue(':params', $params, PDO::PARAM_STR);
+				$sth2->bindValue(':trial', $n, PDO::PARAM_INT);
+				$sth2->execute();
+			}
 		}
 	}
 
@@ -384,7 +399,7 @@ class BaseManager
 			$scriptId = $run["name"];
 			$simulatorName = $run["baseName"];
 
-			$input = "";
+			$input ='"RUN_NAME":"'.$run["name"].'"';
 			foreach ($run["params"] as $param) {
 				if ($input !== "") { $input .= ","; }
 				$input .='"'.str_replace('.', '__DOT__', $param[0]).'":"'.$param[1].'"';
@@ -423,7 +438,7 @@ class BaseManager
 
 			$script .= "exec('rm -f ".$out_filename."');";
 
-			ScriptManager::queuePhpScript($script);
+			ScriptManager::queuePhpScript($script, "/tmp/testout.txt");
 
 			$db = self::connectDB();
 			$sth = $db->prepare("update run set state=1 where name=:name;");
@@ -563,6 +578,13 @@ class BaseManager
 			$simulator['support_input_json'] = true;
 
 			$simulator['parameter_definitions'] = [];
+
+			$parameter1 = [];
+			$parameter1['key'] = 'RUN_NAME';
+			$parameter1['type'] = 'String';
+			$parameter1['default'] = '';
+			$parameter1['description'] = '';
+			$simulator['parameter_definitions'][] = $parameter1;
 
 			$parameter1 = [];
 			$parameter1['key'] = 'MAP';
@@ -778,6 +800,43 @@ class BaseManager
 		return "";
 	}
 
+	public static function getTrialCount($name)
+	{
+		$base = self::getBase($name);
+		if ($base === null) { return null; }
+		return $base["trial"];
+	}
+
+	public static function addTrial($name)
+	{
+		$base = self::getBase($name);
+		if ($base === null) { return null; }
+
+		$trial = $base["trial"] + 1;
+
+		$db = self::connectDB();
+		$sth = $db->prepare("update base set trial=:trial where name=:base;");
+		$sth->bindValue(':base', $base["name"], PDO::PARAM_STR);
+		$sth->bindValue(':trial', $trial, PDO::PARAM_INT);
+		$sth->execute();
+
+		$sth = $db->prepare("select * from run,base where run.base=base.id and base.name=:base and run.trial=0;");
+		$sth->bindValue(':base', $base["name"], PDO::PARAM_STR);
+		$sth->execute();
+		$runs = [];
+		while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
+			$runs[] = $row;
+		}
+		foreach ($runs as $run) {
+			$sth2 = $db->prepare("insert into run(name, base, trial, replaceSetArray) values(:name, :base, :trial, :params);");
+			$sth2->bindValue(':name', str_replace(".", "0", uniqid("", true)), PDO::PARAM_STR);
+			$sth2->bindValue(':base', $run["id"], PDO::PARAM_STR); //TODO: STR ---> INT
+			$sth2->bindValue(':params', $run["replaceSetArray"], PDO::PARAM_STR);
+			$sth2->bindValue(':trial', ($trial -1), PDO::PARAM_INT);
+			$sth2->execute();
+		}
+	}
+
 	private static function connectDB()
 	{
 		$db = DatabaseManager::getDatabase();
@@ -805,6 +864,11 @@ class BaseManager
 		if ($dbVersion <= $version++ )
 		{
 			$db->query("create table dict(id integer primary key, name, value);");
+		}
+		if ($dbVersion <= $version++ )
+		{
+			$db->query("alter table base add column trial default 1;");
+			$db->query("alter table run add column trial default 0;");
 		}
 
 		if ($dbVersion != $version)

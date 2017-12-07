@@ -114,8 +114,8 @@ class MainPage extends AbstractPage
 					<!-- /.box-body -->
 					<div class="box-footer">
 						<div class="text-right">
-							Number of run : <?= 1 ?>
-							<button class="btn btn-xs btn-primary" onclick=""><i class="fa fa-plus"></i></button>
+							Number of trials : <?= BaseManager::getTrialCount($this->base["name"]) ?>
+							<button class="btn btn-xs btn-primary" onclick="location.href='../run_manager-control/addtrial/<?= $this->base["name"] ?>'"><i class="fa fa-plus"></i></button>
 						</div>
 					</div>
 				</div>

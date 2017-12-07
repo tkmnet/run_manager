@@ -1,6 +1,6 @@
 {
     "name" : "RunManager",
-    "version" : "0.0.4",
+    "version" : "0.0.5",
     "description" : "Simulation run manager for S.Takami",
     "icon" : "fa-bar-chart",
     "main_controller" : "rrsoacis\\apps\\tkmnet\\run_manager\\MainPage",
