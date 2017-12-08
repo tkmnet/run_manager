@@ -104,6 +104,11 @@ class AddReplaceSetPage extends AbstractPage
 									<label class="radio-inline">
 										<input type="radio" class="" name="<?= $param["name"] ?>" value="0">FALSE
 									</label>
+								<?php } else if ($param["name"] === "LOGMODE") { ?>
+									<select class="form-control" name="<?= $param["name"] ?>">
+										<option>ALL</option>
+										<option>SCORE</option>
+									</select>
 								<?php } else {
 									$name = str_replace('.', '__DOT__', $param["name"]);
 									?>
