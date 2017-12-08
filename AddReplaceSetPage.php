@@ -26,7 +26,11 @@ class AddReplaceSetPage extends AbstractPage
 			if ($params[2] === "add" && $this->replaceSets != null) {
 				BaseManager::addReplaceSet($this->base["name"], $this->replaceSets["id"], $_POST);
 
-				header('location: ' . Config::$TOP_PATH . 'app/tkmnet/run_manager/' . $params[0]);
+				if ($_POST["CONTINUOUS"] == 1) {
+					header('location: ' . Config::$TOP_PATH . 'app/tkmnet/run_manager-add_rep/' . $params[0].'/'.$params[1]);
+				} else {
+					header('location: ' . Config::$TOP_PATH . 'app/tkmnet/run_manager/' . $params[0]);
+				}
 				return;
 			}
 		} else if (count($params) == 2) {
@@ -117,7 +121,15 @@ class AddReplaceSetPage extends AbstractPage
 				</div>
 				<!-- /.box-body -->
 				<div class="box-footer">
-					<button type="submit" class="btn btn-primary pull-right">Add</button>
+					<div style="display:inline" class="pull-right">
+						<label class="radio-inline">
+							<input type="radio" class="" name="CONTINUOUS" value="1" checked>Continuous
+						</label>
+						<label class="radio-inline">
+							<input type="radio" class="" name="CONTINUOUS" value="0">End
+						</label>
+						<button type="submit" class="btn btn-primary" style="margin-left: 2em;">Add</button>
+					</div>
 				</div>
 				<!-- /.box-footer -->
 				<input type="hidden" name="action" value="create">
