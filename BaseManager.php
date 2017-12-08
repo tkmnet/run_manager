@@ -193,10 +193,11 @@ class BaseManager
 		system("rm -f " . $tmpFileOut);
 
 		$db = self::connectDB();
-		$sth = $db->prepare("insert into base(name, alias, note) values(:name, :alias, :note);");
+		$sth = $db->prepare("insert into base(name, alias, note, version) values(:name, :alias, :note, :version);");
 		$sth->bindValue(':name', $simulatorId, PDO::PARAM_STR);
 		$sth->bindValue(':alias', $alias, PDO::PARAM_STR);
 		$sth->bindValue(':note', $note, PDO::PARAM_STR);
+		$sth->bindValue(':version', self::getbaseVersion(), PDO::PARAM_INT);
 		$sth->execute();
 
 		$sth = $db->prepare("select id from base where name=:name;");
@@ -384,7 +385,7 @@ class BaseManager
 			for ($n = 0; $n < $trial; $n++) {
 				$sth2 = $db->prepare("insert into run(name, base, trial, replaceSetArray) values(:name, :base, :trial, :params);");
 				$sth2->bindValue(':name', str_replace(".", "0", uniqid("", true)), PDO::PARAM_STR);
-				$sth2->bindValue(':base', $base["id"], PDO::PARAM_STR); //TODO: STR ---> INT
+				$sth2->bindValue(':base', $base["id"], PDO::PARAM_INT);
 				$sth2->bindValue(':params', $params, PDO::PARAM_STR);
 				$sth2->bindValue(':trial', $n, PDO::PARAM_INT);
 				$sth2->execute();
@@ -678,10 +679,11 @@ class BaseManager
 			system("rm -f " . $tmpFileOut);
 
 			$db = self::connectDB();
-			$sth = $db->prepare("insert into base(name, alias, note) values(:name, :alias, :note);");
+			$sth = $db->prepare("insert into base(name, alias, note, version) values(:name, :alias, :note, :version);");
 			$sth->bindValue(':name', $simulatorId, PDO::PARAM_STR);
 			$sth->bindValue(':alias', $base["alias"] . "_copy", PDO::PARAM_STR);
 			$sth->bindValue(':note', $base["note"], PDO::PARAM_STR);
+			$sth->bindValue(':version', self::getbaseVersion(), PDO::PARAM_INT);
 			$sth->execute();
 
 			$sth = $db->prepare("select id from base where name=:name;");
@@ -696,6 +698,8 @@ class BaseManager
 			$sth->bindValue(':newbase', $baseId, PDO::PARAM_INT);
 			$sth->bindValue(':base', $base["id"], PDO::PARAM_INT);
 			$sth->execute();
+
+			self::addParameterToDB($db, $baseId, "LOGMODE", null);
 
 			return $simulatorId;
 		}
@@ -764,7 +768,7 @@ class BaseManager
 
 			$db = self::connectDB();
 			$sth = $db->prepare("select name from run where base=:base;");
-			$sth->bindValue(':base', $base["id"], PDO::PARAM_STR); //TODO: STR ---> INT
+			$sth->bindValue(':base', $base["id"], PDO::PARAM_INT);
 			$sth->execute();
 			$runNames = [];
 			while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
@@ -830,11 +834,18 @@ class BaseManager
 		foreach ($runs as $run) {
 			$sth2 = $db->prepare("insert into run(name, base, trial, replaceSetArray) values(:name, :base, :trial, :params);");
 			$sth2->bindValue(':name', str_replace(".", "0", uniqid("", true)), PDO::PARAM_STR);
-			$sth2->bindValue(':base', $run["id"], PDO::PARAM_STR); //TODO: STR ---> INT
+			$sth2->bindValue(':base', $run["id"], PDO::PARAM_INT);
 			$sth2->bindValue(':params', $run["replaceSetArray"], PDO::PARAM_STR);
 			$sth2->bindValue(':trial', ($trial -1), PDO::PARAM_INT);
 			$sth2->execute();
 		}
+	}
+
+	public static function getbaseVersion()
+	{
+		$db = self::connectDB();
+		$sth = $db->query('select value from system where name="baseVersion";');
+		return $sth->fetch(PDO::FETCH_ASSOC)["value"];
 	}
 
 	private static function connectDB()
@@ -869,6 +880,11 @@ class BaseManager
 		{
 			$db->query("alter table base add column trial default 1;");
 			$db->query("alter table run add column trial default 0;");
+		}
+		if ($dbVersion <= $version++ )
+		{
+			$db->query("alter table base add column version default 1;");
+			$db->query("insert into system(name,value) values('baseVersion', 2);");
 		}
 
 		if ($dbVersion != $version)
