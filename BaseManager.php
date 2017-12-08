@@ -699,7 +699,9 @@ class BaseManager
 			$sth->bindValue(':base', $base["id"], PDO::PARAM_INT);
 			$sth->execute();
 
-			self::addParameterToDB($db, $baseId, "LOGMODE", null);
+			if ($base["version"] < 2) {
+				self::addParameterToDB($db, $baseId, "LOGMODE", null);
+			}
 
 			return $simulatorId;
 		}
