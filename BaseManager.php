@@ -700,7 +700,7 @@ class BaseManager
 			$sth->execute();
 
 			if ($base["version"] < 2) {
-				self::addParameterToDB($db, $baseId, "LOGMODE", null);
+				self::addParameterToDB($db, $baseId, "LOGMODE", '');
 			}
 
 			return $simulatorId;
