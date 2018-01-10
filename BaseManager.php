@@ -852,6 +852,18 @@ class BaseManager
 		$db->commit();
 	}
 
+    public static function updateAliasName($name, $newalias)
+    {
+        $base = self::getBase($name);
+        if ($base === null) { return null; }
+
+        $db = self::connectDB();
+        $sth = $db->prepare("update base set alias=:alias where name=:base;");
+        $sth->bindValue(':base', $base["name"], PDO::PARAM_STR);
+        $sth->bindValue(':alias', $newalias, PDO::PARAM_STR);
+        $sth->execute();
+    }
+
 	public static function getbaseVersion()
 	{
 		$db = self::connectDB();

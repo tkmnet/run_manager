@@ -89,13 +89,17 @@ class MainPage extends AbstractPage
 		<div class="row">
 			<div class="col-xs-12">
 				<div class="box">
-					<div class="box-header">
-						<h3 class="box-title"><?= $this->base["alias"] ?></h3>
-						<div class="box-tools">
-							<button class="btn btn-success" onclick="location.href='./<?= $this->base["name"] ?>/runlist'">RunList</button>
-							<button class="btn btn-default" onclick="window.open('http://'+location.host.replace(location.port,3000)+'/simulators/<?= $this->base["name"] ?>');">OACIS</button>
-						</div>
-					</div>
+                    <form method="post" action="../run_manager-control/rename/<?= $this->base["name"] ?>">
+                        <div class="box-header">
+                            <h3 class="box-title">
+                                <input type="text" name="alias" value="<?= $this->base["alias"] ?>">
+                            </h3>
+                            <div class="box-tools">
+                                <button class="btn btn-success" onclick="location.href='./<?= $this->base["name"] ?>/runlist'">RunList</button>
+                                <button class="btn btn-default" onclick="window.open('http://'+location.host.replace(location.port,3000)+'/simulators/<?= $this->base["name"] ?>');">OACIS</button>
+                            </div>
+                        </div>
+                    </form>
 					<!-- /.box-header -->
 					<div class="box-body table-responsive no-padding">
 						<table class="table">

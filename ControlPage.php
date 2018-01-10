@@ -51,6 +51,10 @@ class ControlPage extends AbstractPage
 			BaseManager::addTrial($params[1]);
 			header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[1].'');
 			return;
+        } elseif ($cmd === "rename") {
+            BaseManager::updateAliasName($params[1], $_POST["alias"]);
+            header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[1].'');
+            return;
 		}
 
 		header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager');
