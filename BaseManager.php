@@ -400,8 +400,12 @@ class BaseManager
         $db->commit();
 	}
 
-	public static function postRunToOACIS($runName)
+	public static function postRunToOACIS($runName, $db = null)
 	{
+	    if ($db === null) {
+            $db = self::connectDB();
+        }
+
 		$run = self::getRun($runName);
 		if ($run != null) {
 			$scriptId = $run["name"];
@@ -448,7 +452,6 @@ class BaseManager
 
 			ScriptManager::queuePhpScript($script, "/tmp/testout.txt");
 
-			$db = self::connectDB();
 			$sth = $db->prepare("update run set state=1 where name=:name;");
 			$sth->bindValue(':name', $runName, PDO::PARAM_STR);
 			$sth->execute();
@@ -871,7 +874,7 @@ class BaseManager
 		return $sth->fetch(PDO::FETCH_ASSOC)["value"];
 	}
 
-	private static function connectDB()
+	public static function connectDB()
 	{
 		$db = DatabaseManager::getDatabase();
 		$version = 0;

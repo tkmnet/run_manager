@@ -28,9 +28,12 @@ class ControlPage extends AbstractPage
 			}
 		} elseif ($cmd === "postall") {
 			$pendingRuns = BaseManager::getPendingRunList($params[1], 0, -1);
+			$db = BaseManager::connectDB();
+			$db->beginTransaction();
 			foreach ($pendingRuns as $run) {
-				BaseManager::postRunToOACIS($run["name"]);
+				BaseManager::postRunToOACIS($run["name"], $db);
 			}
+			$db->commit();
 			header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[1].'/runlist');
 			return;
 		} elseif ($cmd === "duplicate_base") {
