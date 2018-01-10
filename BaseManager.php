@@ -374,6 +374,7 @@ class BaseManager
 		$trial = $sth->fetch(PDO::FETCH_ASSOC)["trial"];
 
 		$sth = $db->query($select);
+		$paramsArray = [];
 		while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
 			$params = "";
 			foreach ($row as $r) {
@@ -382,15 +383,21 @@ class BaseManager
 				}
 				$params .= $r;
 			}
-			for ($n = 0; $n < $trial; $n++) {
-				$sth2 = $db->prepare("insert into run(name, base, trial, replaceSetArray) values(:name, :base, :trial, :params);");
-				$sth2->bindValue(':name', str_replace(".", "0", uniqid("", true)), PDO::PARAM_STR);
-				$sth2->bindValue(':base', $base["id"], PDO::PARAM_INT);
-				$sth2->bindValue(':params', $params, PDO::PARAM_STR);
-				$sth2->bindValue(':trial', $n, PDO::PARAM_INT);
-				$sth2->execute();
-			}
+			$paramsArray [] = $params;
 		}
+
+		$db->beginTransaction();
+		foreach ($paramsArray as $params) {
+            for ($n = 0; $n < $trial; $n++) {
+                $sth2 = $db->prepare("insert into run(name, base, trial, replaceSetArray) values(:name, :base, :trial, :params);");
+                $sth2->bindValue(':name', str_replace(".", "0", uniqid("", true)), PDO::PARAM_STR);
+                $sth2->bindValue(':base', $base["id"], PDO::PARAM_INT);
+                $sth2->bindValue(':params', $params, PDO::PARAM_STR);
+                $sth2->bindValue(':trial', $n, PDO::PARAM_INT);
+                $sth2->execute();
+            }
+        }
+        $db->commit();
 	}
 
 	public static function postRunToOACIS($runName)
@@ -833,6 +840,7 @@ class BaseManager
 		while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
 			$runs[] = $row;
 		}
+		$db->beginTransaction();
 		foreach ($runs as $run) {
 			$sth2 = $db->prepare("insert into run(name, base, trial, replaceSetArray) values(:name, :base, :trial, :params);");
 			$sth2->bindValue(':name', str_replace(".", "0", uniqid("", true)), PDO::PARAM_STR);
@@ -841,6 +849,7 @@ class BaseManager
 			$sth2->bindValue(':trial', ($trial -1), PDO::PARAM_INT);
 			$sth2->execute();
 		}
+		$db->commit();
 	}
 
 	public static function getbaseVersion()
