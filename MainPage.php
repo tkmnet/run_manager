@@ -10,11 +10,15 @@ class MainPage extends AbstractPage
 	private $bases;
 	private $base = null;
 	private $cmd = '';
+    private $cmd2 = '';
 	public function controller($params)
 	{
 		if (count($params) >= 1) {
 			if (count($params) >= 2) {
 				$this->cmd = $params[1];
+                if (count($params) >= 3) {
+                    $this->cmd2 = $params[2];
+                }
 			}
 			$this->base = BaseManager::getBase($params[0]);
 		} else {
@@ -31,6 +35,11 @@ class MainPage extends AbstractPage
 				"<a href='../../run_manager'>Run Manager</a>",
 				"<a href='../../run_manager/".$this->base["name"]."'>".$this->base["name"]."</a>"]);
 			$this->printRunList();
+			if ($this->cmd2 === "postall") {
+			    ?>
+                <meta http-equiv="refresh" content="0.01;URL=../../../run_manager-control/postall/<?= $this->base["name"] ?>">
+			    <?php
+            }
 		} else if ($this->base != null) {
 			self::writeContentHeader($this->base["name"],"Run Manager", ["<a href='../run_manager'>Run Manager</a>"]);
 			$this->printBasePage();

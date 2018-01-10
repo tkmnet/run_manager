@@ -30,11 +30,19 @@ class ControlPage extends AbstractPage
 			$pendingRuns = BaseManager::getPendingRunList($params[1], 0, -1);
 			$db = BaseManager::connectDB();
 			$db->beginTransaction();
+			$c = 0;
 			foreach ($pendingRuns as $run) {
 				BaseManager::postRunToOACIS($run["name"], $db);
+				if  (++$c >= 10) {
+				    break;
+				}
 			}
 			$db->commit();
-			header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[1].'/runlist');
+			if (count(BaseManager::getPendingRunList($params[1], 0, -1)) > 0) {
+                header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[1].'/runlist/postall');
+            } else {
+                header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[1].'/runlist');
+            }
 			return;
 		} elseif ($cmd === "duplicate_base") {
 			$newName = BaseManager::duplicateBase($params[1]);
