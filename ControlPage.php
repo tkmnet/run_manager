@@ -44,6 +44,25 @@ class ControlPage extends AbstractPage
                 header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[1].'/runlist');
             }
 			return;
+        } elseif ($cmd === "update_score") {
+		    $base = BaseManager::getBase($params[1]);
+            $db = self::connectDB();
+            $sth = $db->prepare("select name from run where base=:base and state=2;");
+            $sth->bindValue(':base', $base["id"], PDO::PARAM_INT);
+            $sth->execute();
+            $runNames = [];
+            while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
+                $runNames[] = $row["name"];
+            }
+            $c = 0;
+            foreach ($runNames as $runName) {
+                self::updateScore($runName);
+                if ($c >= 10) {
+                    header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[1].'/runlist/update_score');
+                    return;
+                }
+            }
+            header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[1].'/runlist');
 		} elseif ($cmd === "duplicate_base") {
 			$newName = BaseManager::duplicateBase($params[1]);
 			header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$newName);

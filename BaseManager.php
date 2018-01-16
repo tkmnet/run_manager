@@ -760,13 +760,17 @@ class BaseManager
 			}
 
 			$db = self::connectDB();
-			$sth = $db->prepare("update run set score=:score where id=:id;");
 			if ($finished) {
                 $sth = $db->prepare("update run set score=:score,state=0 where id=:id;");
+                $sth->bindValue(':id', $run["id"], PDO::PARAM_INT);
+                $sth->bindValue(':score', $newScore, PDO::PARAM_STR);
+                $sth->execute();
+            } else if ($run["score"] != -1) {
+                $sth = $db->prepare("update run set score=:score where id=:id;");
+                $sth->bindValue(':id', $run["id"], PDO::PARAM_INT);
+                $sth->bindValue(':score', $newScore, PDO::PARAM_STR);
+                $sth->execute();
             }
-			$sth->bindValue(':id', $run["id"], PDO::PARAM_INT);
-			$sth->bindValue(':score', $newScore, PDO::PARAM_STR);
-			$sth->execute();
 		}
 	}
 

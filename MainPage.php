@@ -39,6 +39,10 @@ class MainPage extends AbstractPage
 			    ?>
                 <meta http-equiv="refresh" content="0.01;URL=../../../run_manager-control/postall/<?= $this->base["name"] ?>">
 			    <?php
+            } else if ($this->cmd2 === "update_score") {
+                ?>
+                <meta http-equiv="refresh" content="0.01;URL=../../../run_manager-control/update_score/<?= $this->base["name"] ?>">
+                <?php
             }
 		} else if ($this->base != null) {
 			self::writeContentHeader($this->base["name"],"Run Manager", ["<a href='../run_manager'>Run Manager</a>"]);
