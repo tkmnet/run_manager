@@ -774,7 +774,7 @@ class BaseManager
 		}
 	}
 
-	public static function getResultCsv($name)
+	public static function printResultCsv($name)
 	{
 		$base = self::getBase($name);
 		if ($base !== null) {
