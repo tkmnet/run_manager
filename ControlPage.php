@@ -58,7 +58,7 @@ class ControlPage extends AbstractPage
             $c = 0;
             foreach ($runNames as $runName) {
                 BaseManager::updateScore($runName);
-                if ($c >= 10) {
+                if (++$c >= 10) {
                     header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[1].'/runlist/update_score');
                     return;
                 }
