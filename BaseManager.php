@@ -751,13 +751,19 @@ class BaseManager
 		if ($run !== null) {
 			$oacisRun = self::getOacisRun($run);
 			$newScore = -1;
-			if ($oacisRun !== false)
-			{
-				$newScore = $oacisRun->result->Score;
+			$finished = false;
+			if ($oacisRun !== false) {
+			    if ($oacisRun->status === "finished") {
+                    $newScore = $oacisRun->result->Score;
+                    $finished = true;
+                }
 			}
 
 			$db = self::connectDB();
 			$sth = $db->prepare("update run set score=:score where id=:id;");
+			if ($finished) {
+                $sth = $db->prepare("update run set score=:score and state=0 where id=:id;");
+            }
 			$sth->bindValue(':id', $run["id"], PDO::PARAM_INT);
 			$sth->bindValue(':score', $newScore, PDO::PARAM_STR);
 			$sth->execute();
@@ -788,8 +794,11 @@ class BaseManager
 			}
 
 			foreach ($runNames as $runName) {
-				self::updateScore($runName);
-				$run = self::getRun($runName);
+                $run = self::getRun($runName);
+                if ($run->state != 0) {
+                    self::updateScore($runName);
+                    $run = self::getRun($runName);
+                }
 
 				if ($result === "") {
 					foreach ($run["params"] as $param) {
