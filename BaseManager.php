@@ -819,6 +819,7 @@ class BaseManager
                     $result .= '"' . $param[0] . '",';
                 }
                 $result .= "\"Score\",\n";
+                print $result;
 			}
 
             $sth = $db->prepare("select csvtext from run where base=:base;");
