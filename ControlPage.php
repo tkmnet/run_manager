@@ -46,7 +46,7 @@ class ControlPage extends AbstractPage
 			return;
         } elseif ($cmd === "update_score") {
 		    $base = BaseManager::getBase($params[1]);
-            $db = self::connectDB();
+            $db = BaseManager::connectDB();
             $sth = $db->prepare("select name from run where base=:base and state=2;");
             $sth->bindValue(':base', $base["id"], PDO::PARAM_INT);
             $sth->execute();
