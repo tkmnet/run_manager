@@ -270,15 +270,15 @@ class MainPage extends AbstractPage
 		?>
 		<footer class="main-footer">
 			<?php if ($this->base === null) { ?>
-				<a href="./run_manager-add_dict">
+				<a href="/app/tkmnet/run_manager-add_dict">
 					<i class="fa fa-book"></i> Dict
 				</a>
 			<?php } else if ($this->cmd === "") { ?>
-				<a href="../run_manager-control/duplicate_base/<?= $this->base["name"] ?>">
+				<a href="/app/tkmnet/run_manager-control/duplicate_base/<?= $this->base["name"] ?>">
 					<i class="fa fa-clone"></i> Duplicate Base
 				</a>
 			<?php } else if ($this->cmd === "runlist") { ?>
-				<a href="../../run_manager-control/getcsv/<?= $this->base["name"] ?>">
+				<a href="/app/tkmnet/run_manager-control/getcsv/<?= $this->base["name"] ?>">
 					<i class="fa fa-table"></i> Result CSV
 				</a>
 			<?php } ?>
