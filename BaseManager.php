@@ -923,7 +923,7 @@ class BaseManager
         if ($dbVersion <= $version++ )
         {
             $db->query("alter table run add column csvtext default '';");
-            $sth = $db->prepare("update run set state=2 where state=0;");
+            $db->query("update run set state=2 where state=0;");
         }
 
 		if ($dbVersion != $version)
