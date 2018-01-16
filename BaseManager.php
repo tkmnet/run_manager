@@ -778,7 +778,7 @@ class BaseManager
 	{
 		$base = self::getBase($name);
 		if ($base !== null) {
-			$result = "";
+			//$result = "";
 
 			/*
 			 * //get Default parameter
@@ -798,6 +798,7 @@ class BaseManager
 			}
 
 			foreach ($runNames as $runName) {
+                $result = "";
                 $run = self::getRun($runName);
 		/*
                 if ($run["state"] != 0) {
@@ -822,9 +823,10 @@ class BaseManager
 					$result .= "-1,";
 				}
 				$result .= "\n";
+				print $result;
 			}
 
-			return $result;
+			//return $result;
 		}
 
 		return "";
