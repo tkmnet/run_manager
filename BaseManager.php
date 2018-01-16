@@ -514,6 +514,7 @@ class BaseManager
 			$run = $row;
 			$params = [];
 			$replaceSetIDArray = explode(",", $row["replaceSetArray"]);
+            $run["replaceSets"] = [];
 			foreach ($replaceSetIDArray as $replaceSetID) {
 				$replaceSet = self::getReplaceSetFromID($replaceSetID);
 				foreach ($replaceSet["replace"] as $replace) {
@@ -522,6 +523,7 @@ class BaseManager
 					$param[1] = $replace["value"];
 					$params[] = $param;
 				}
+                $run["replaceSets"][] = $replaceSet["replace"];
 			}
 			$run["params"] = $params;
 		}
@@ -768,8 +770,14 @@ class BaseManager
 			}
 
             $csvtext = "";
-            foreach ($run["params"] as $param) {
-                $csvtext .= '"' . $param[1] . '",';
+            foreach ($run["replaceSet"] as $replaceSet) {
+                $replaceSetText = "";
+                foreach ($replaceSet as $replace) {
+                    if ($replaceSetText !== "") {
+                        $replaceSetText .= "|";
+                    }
+                    $replaceSetText .= $replace["value"];
+                }
             }
             if ($newScore !== null) {
                 $csvtext .= $newScore . ",";
@@ -815,8 +823,14 @@ class BaseManager
 			$sth->execute();
 			while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
                 $run = self::getRun($row["name"]);
-                foreach ($run["params"] as $param) {
-                    $result .= '"' . $param[0] . '",';
+                foreach ($run["replaceSet"] as $replaceSet) {
+                    $replaceSetText = "";
+                    foreach ($replaceSet as $replace) {
+                        if ($replaceSetText !== "") {
+                            $replaceSetText .= "|";
+                        }
+                        $replaceSetText .= $replace["parameterName"];
+                    }
                 }
                 $result .= "\"Score\",\n";
                 print $result;
