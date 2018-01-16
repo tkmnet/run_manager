@@ -56,8 +56,56 @@ class MainPage extends AbstractPage
 	function printRunList()
 	{
 		$pendingRuns = BaseManager::getPendingRunList($this->base["name"], 0, 10);
+
+		$allrun = 0;
+        $finished = 0;
+        $submitted = 0;
+		$pendding = 0;
+        foreach ($this->base["overview"] as $overview) {
+            $allrun += $overview["number"];
+            switch ($overview["state"]) {
+                case 0: $finished = $overview["number"]; break;
+                case 2: $submitted = $overview["number"]; break;
+                case -10: $pendding = $overview["number"]; break;
+            }
+        }
+
 		self::beginContent();
 		?>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">Number of run</h3>
+                        <div class="box-tools">
+                            <button class="btn btn-info" onclick="location.href='/app/tkmnet/run_manager-control/update_score/<?= $this->base["name"] ?>'">
+                                <i class="fa fa-refresh"></i> Update score</button>
+                        </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body table-responsive no-padding">
+                        <div class="progress">
+                            <div class="progress-bar progress-bar-success" role="progressbar" style="width:<?= $finished / $allrun * 100 ?>%">
+                                Finished(<?= $finished ?>)
+                            </div>
+                            <div class="progress-bar progress-bar-warning" role="progressbar" style="width:<?= $submitted / $allrun * 100 ?>%">
+                                Submitted(<?= $submitted ?>)
+                            </div>
+                            <div class="progress-bar progress-bar-info" role="progressbar" style="width:<?= $pendding / $allrun * 100 ?>%">
+                                Pendding(<?= $pendding ?>)
+                            </div>
+                        </div>
+                        <div class="text-center" style="margin-bottom:1em;margin-top: -1em;">
+                            <?php foreach ($this->base["overview"] as $overview) { ?>
+                                <?= $overview["state"] ?>(<?= $overview["number"] ?>),
+                            <?php } ?>
+                        </div>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </div>
+        </div>
 		<div class="row">
 			<div class="col-xs-12">
 				<div class="box box-success">
@@ -91,36 +139,6 @@ class MainPage extends AbstractPage
 				<!-- /.box -->
 			</div>
 		</div>
-        <div class="row">
-            <div class="col-xs-12">
-                <div class="box box-info">
-                    <div class="box-header">
-                        <h3 class="box-title">Number of run</h3>
-                        <div class="box-tools">
-                            <button class="btn btn-info" onclick="location.href='/app/tkmnet/run_manager-control/update_score/<?= $this->base["name"] ?>'">
-                                <i class="fa fa-refresh"></i> Update score</button>
-                        </div>
-                    </div>
-                    <!-- /.box-header -->
-                    <div class="box-body table-responsive no-padding">
-                        <table class="table">
-                            <tr>
-                                <th>State</th>
-                                <th>Number</th>
-                            </tr>
-                        <?php foreach ($this->base["overview"] as $overview) { ?>
-                            <tr>
-                                <td><?= $overview["state"] ?></td>
-                                <td><?= $overview["number"] ?></td>
-                            </tr>
-                        <?php } ?>
-                        </table>
-                    </div>
-                    <!-- /.box-body -->
-                </div>
-                <!-- /.box -->
-            </div>
-        </div>
 		<?php
 		self::endContent();
 	}
