@@ -73,7 +73,7 @@ class ControlPage extends AbstractPage
 			error_reporting(0);
 			//header('Content-Type: application/zip; name="' . $zipFileName . '"');
 			header('Content-Type: text/csv;');
-			//header('Content-Disposition: attachment; filename="' . $zipFileName . '"');
+			header('Content-Disposition: attachment; filename="'.BaseManager::getBase($params[1])["alias"].'('.$params[1].').csv"');
 			//header('Content-Length: ' . (strlen(bin2hex($output))/2));
 			if (count($params) == 2) {
 				echo BaseManager::getResultCsv($params[1]);
