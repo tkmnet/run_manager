@@ -778,6 +778,7 @@ class BaseManager
                     }
                     $replaceSetText .= $replace["value"];
                 }
+                $csvtext .= $replaceSetText . ",";
             }
             if ($newScore !== null) {
                 $csvtext .= $newScore . ",";
@@ -831,6 +832,7 @@ class BaseManager
                         }
                         $replaceSetText .= $replace["parameterName"];
                     }
+                    $result .= $replaceSetText . ",";
                 }
                 $result .= "\"Score\",\n";
                 print $result;
