@@ -56,13 +56,16 @@ class ControlPage extends AbstractPage
                 $runNames[] = $row["name"];
             }
             $c = 0;
+            $db->beginTransaction();
             foreach ($runNames as $runName) {
                 BaseManager::updateScore($runName, $db);
                 if (++$c >= 30) {
+                    $db->commit();
                     header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[1].'/runlist/update_score');
                     return;
                 }
             }
+            $db->commit();
             header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[1].'/runlist');
 			return;
 		} elseif ($cmd === "duplicate_base") {
