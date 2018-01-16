@@ -64,6 +64,7 @@ class ControlPage extends AbstractPage
                 }
             }
             header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[1].'/runlist');
+			return:
 		} elseif ($cmd === "duplicate_base") {
 			$newName = BaseManager::duplicateBase($params[1]);
 			header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$newName);
