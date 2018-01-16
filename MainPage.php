@@ -44,7 +44,7 @@ class MainPage extends AbstractPage
                 <meta http-equiv="refresh" content="0.01;URL=../../../run_manager-control/update_score/<?= $this->base["name"] ?>">
                 <?php
             }
-		} else if ($this->base != null) {
+        } else if ($this->base != null) {
 			self::writeContentHeader($this->base["name"],"Run Manager", ["<a href='../run_manager'>Run Manager</a>"]);
 			$this->printBasePage();
 		} else {
@@ -91,6 +91,34 @@ class MainPage extends AbstractPage
 				<!-- /.box -->
 			</div>
 		</div>
+        <div class="row">
+            <div class="col-xs-12">
+                <div class="box box-info">
+                    <div class="box-header">
+                        <h3 class="box-title">Number of run</h3>
+                        <div class="box-tools">
+                        </div>
+                    </div>
+                    <!-- /.box-header -->
+                    <div class="box-body table-responsive no-padding">
+                        <table class="table">
+                            <tr>
+                                <th>State</th>
+                                <th>Number</th>
+                            </tr>
+                        <?php foreach ($this->base["overview"] as $overview) { ?>
+                            <tr>
+                                <td><?= $overview["state"] ?></td>
+                                <td><?= $overview["number"] ?></td>
+                            </tr>
+                        <?php } ?>
+                        </table>
+                    </div>
+                    <!-- /.box-body -->
+                </div>
+                <!-- /.box -->
+            </div>
+        </div>
 		<?php
 		self::endContent();
 	}

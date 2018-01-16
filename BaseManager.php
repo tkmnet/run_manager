@@ -87,6 +87,14 @@ class BaseManager
 
 				$base["replaceSets"][] = $replaceSets;
 			}
+
+            $base["overview"] = [];
+            $sth2 = $db->prepare("select state,count(*) as number from run where base=:baseId group by state;");
+            $sth2->bindValue(':baseId', $base["id"], PDO::PARAM_INT);
+            $sth2->execute();
+            while ($row2 = $sth2->fetch(PDO::FETCH_ASSOC)) {
+                $base["overview"][] = $row2;
+            }
 		}
 		return $base;
 	}
