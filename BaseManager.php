@@ -755,7 +755,7 @@ class BaseManager
 		return json_decode($rawData);
 	}
 
-	public static function updateScore($runName)
+	public static function updateScore($runName, $db = null)
 	{
 		$run = self::getRun($runName);
 		if ($run !== null) {
@@ -787,7 +787,9 @@ class BaseManager
             }
             $csvtext .= "\n";
 
-			$db = self::connectDB();
+            if ($db === null) {
+                $db = self::connectDB();
+            }
 			if ($finished) {
                 $sth = $db->prepare("update run set score=:score,state=0,csvtext=:csvtext where id=:id;");
                 $sth->bindValue(':id', $run["id"], PDO::PARAM_INT);
