@@ -97,6 +97,8 @@ class MainPage extends AbstractPage
                     <div class="box-header">
                         <h3 class="box-title">Number of run</h3>
                         <div class="box-tools">
+                            <button class="btn btn-info" onclick="location.href='../../run_manager-control/update_score/<?= $this->base["name"] ?>'">
+                                <i class="fa fa-refresh"></i> Update score</button>
                         </div>
                     </div>
                     <!-- /.box-header -->
