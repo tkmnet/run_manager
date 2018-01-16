@@ -770,7 +770,7 @@ class BaseManager
 			}
 
             $csvtext = "";
-            foreach ($run["replaceSet"] as $replaceSet) {
+            foreach ($run["replaceSets"] as $replaceSet) {
                 $replaceSetText = "";
                 foreach ($replaceSet as $replace) {
                     if ($replaceSetText !== "") {
@@ -823,7 +823,7 @@ class BaseManager
 			$sth->execute();
 			while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
                 $run = self::getRun($row["name"]);
-                foreach ($run["replaceSet"] as $replaceSet) {
+                foreach ($run["replaceSets"] as $replaceSet) {
                     $replaceSetText = "";
                     foreach ($replaceSet as $replace) {
                         if ($replaceSetText !== "") {
