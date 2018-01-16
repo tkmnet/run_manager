@@ -4,6 +4,7 @@ namespace rrsoacis\apps\tkmnet\run_manager;
 
 use rrsoacis\component\common\AbstractPage;
 use rrsoacis\system\Config;
+use \PDO;
 
 class ControlPage extends AbstractPage
 {
