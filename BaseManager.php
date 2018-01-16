@@ -799,10 +799,11 @@ class BaseManager
 
 			foreach ($runNames as $runName) {
                 $run = self::getRun($runName);
+		/*
                 if ($run["state"] != 0) {
                     self::updateScore($runName);
                     $run = self::getRun($runName);
-                }
+                }*/
 
 				if ($result === "") {
 					foreach ($run["params"] as $param) {
