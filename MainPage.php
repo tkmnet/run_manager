@@ -32,8 +32,8 @@ class MainPage extends AbstractPage
 	{
 		if ($this->cmd === "runlist") {
 			self::writeContentHeader("RunList", $this->base["name"], [
-				"<a href='../../run_manager'>Run Manager</a>",
-				"<a href='../../run_manager/".$this->base["name"]."'>".$this->base["name"]."</a>"]);
+				"<a href='/app/tkmnet/run_manager'>Run Manager</a>",
+				"<a href='/app/tkmnet/run_manager/".$this->base["name"]."'>".$this->base["name"]."</a>"]);
 			$this->printRunList();
 			if ($this->cmd2 === "postall") {
 			    ?>
@@ -64,7 +64,7 @@ class MainPage extends AbstractPage
 					<div class="box-header">
 						<h3 class="box-title">Pending Run List</h3>
 						<div class="box-tools">
-							<button class="btn btn-info" onclick="location.href='../../run_manager-control/postall/<?= $this->base["name"] ?>'">
+							<button class="btn btn-info" onclick="location.href='/app/tkmnet/run_manager-control/postall/<?= $this->base["name"] ?>'">
 								<i class="fa fa-arrow-right"></i> Post all</button>
 						</div>
 					</div>
@@ -80,7 +80,7 @@ class MainPage extends AbstractPage
 								<tr>
 									<td><?= $run["name"] ?></td>
 									<td><?= $run["replaceSetArray"] ?></td>
-									<td><button class="btn btn-xs btn-info" onclick="location.href='../../run_manager-control/post/<?= $run["name"] ?>'">
+									<td><button class="btn btn-xs btn-info" onclick="location.href='/app/tkmnet/run_manager-control/post/<?= $run["name"] ?>'">
 											<i class="fa fa-arrow-right"></i> Post</button></td>
 								</tr>
 							<?php } ?>
@@ -97,7 +97,7 @@ class MainPage extends AbstractPage
                     <div class="box-header">
                         <h3 class="box-title">Number of run</h3>
                         <div class="box-tools">
-                            <button class="btn btn-info" onclick="location.href='../../run_manager-control/update_score/<?= $this->base["name"] ?>'">
+                            <button class="btn btn-info" onclick="location.href='/app/tkmnet/run_manager-control/update_score/<?= $this->base["name"] ?>'">
                                 <i class="fa fa-refresh"></i> Update score</button>
                         </div>
                     </div>
