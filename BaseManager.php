@@ -759,16 +759,29 @@ class BaseManager
                 }
 			}
 
+            $csvtext = "";
+            foreach ($run["params"] as $param) {
+                $csvtext .= '"' . $param[1] . '",';
+            }
+            if ($newScore !== null) {
+                $csvtext .= $newScore . ",";
+            } else {
+                $csvtext .= "-1,";
+            }
+            $csvtext .= "\n";
+
 			$db = self::connectDB();
 			if ($finished) {
-                $sth = $db->prepare("update run set score=:score,state=0 where id=:id;");
+                $sth = $db->prepare("update run set score=:score,state=0,csvtext=:csvtext where id=:id;");
                 $sth->bindValue(':id', $run["id"], PDO::PARAM_INT);
                 $sth->bindValue(':score', $newScore, PDO::PARAM_STR);
+                $sth->bindValue(':csvtext', $csvtext, PDO::PARAM_STR);
                 $sth->execute();
             } else if ($run["score"] != -1) {
-                $sth = $db->prepare("update run set score=:score where id=:id;");
+                $sth = $db->prepare("update run set score=:score,csvtext=:csvtext where id=:id;");
                 $sth->bindValue(':id', $run["id"], PDO::PARAM_INT);
                 $sth->bindValue(':score', $newScore, PDO::PARAM_STR);
+                $sth->bindValue(':csvtext', $csvtext, PDO::PARAM_STR);
                 $sth->execute();
             }
 		}
@@ -778,7 +791,7 @@ class BaseManager
 	{
 		$base = self::getBase($name);
 		if ($base !== null) {
-			//$result = "";
+			$result = "";
 
 			/*
 			 * //get Default parameter
@@ -789,44 +802,23 @@ class BaseManager
                 */
 
 			$db = self::connectDB();
-			$sth = $db->prepare("select name from run where base=:base;");
+			$sth = $db->prepare("select name from run where base=:base limit 1;");
 			$sth->bindValue(':base', $base["id"], PDO::PARAM_INT);
 			$sth->execute();
-			$runNames = [];
 			while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
-				$runNames[] = $row["name"];
+                $run = self::getRun($row["name"]);
+                foreach ($run["params"] as $param) {
+                    $result .= '"' . $param[0] . '",';
+                }
+                $result .= "\"Score\",\n";
 			}
 
-			foreach ($runNames as $runName) {
-                $result = "";
-                $run = self::getRun($runName);
-		/*
-                if ($run["state"] != 0) {
-                    self::updateScore($runName);
-                    $run = self::getRun($runName);
-                }*/
-
-				if ($result === "") {
-					foreach ($run["params"] as $param) {
-						$result .= '"' . $param[0] . '",';
-					}
-					$result .= "\"Score\",\n";
-				}
-				foreach ($run["params"] as $param) {
-					$result .= '"' . $param[1] . '",';
-				}
-
-				$score = $run["score"];
-				if ($score !== null) {
-					$result .= $score . ",";
-				} else {
-					$result .= "-1,";
-				}
-				$result .= "\n";
-				print $result;
-			}
-
-			//return $result;
+            $sth = $db->prepare("select csvtext from run where base=:base;");
+            $sth->bindValue(':base', $base["id"], PDO::PARAM_INT);
+            $sth->execute();
+            while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
+                print $row["csvtext"];
+            }
 		}
 
 		return "";
@@ -928,6 +920,11 @@ class BaseManager
 			$db->query("alter table base add column version default 1;");
 			$db->query("insert into system(name,value) values('baseVersion', 2);");
 		}
+        if ($dbVersion <= $version++ )
+        {
+            $db->query("alter table run add column csvtext default '';");
+            $sth = $db->prepare("update run set state=2 where state=0;");
+        }
 
 		if ($dbVersion != $version)
 		{
