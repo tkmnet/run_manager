@@ -12,8 +12,10 @@ class MainPage extends AbstractPage
 	private $cmd = '';
     private $cmd2 = '';
     private $cmd3 = '';
+    private $param_count = 0;
 	public function controller($params)
 	{
+		$param_count = count($params);
 		if (count($params) >= 1) {
 			if (count($params) >= 2) {
 				$this->cmd = $params[1];
@@ -45,7 +47,7 @@ class MainPage extends AbstractPage
 			    <?php
             } else if ($this->cmd2 === "update_score") {
                 ?>
-                <meta http-equiv="refresh" content="0.01;URL=../../../run_manager-control/update_score/<?= $this->base["name"] ?>/<?= $this->cmd3 ?>">
+                <meta http-equiv="refresh" content="0.01;URL=".str_repeat("../", $param_count)."run_manager-control/update_score/<?= $this->base["name"] ?>/<?= $this->cmd3 ?>">
                 <?php
             }
         } else if ($this->base != null) {
