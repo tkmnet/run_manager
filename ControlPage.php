@@ -49,8 +49,9 @@ class ControlPage extends AbstractPage
             $base = BaseManager::getBase($params[1]);
             $offset = 0 + $params[2];
             $db = BaseManager::connectDB();
-            $sth = $db->prepare("select name from run where base=:base and (state=2 or score=-1) offset ".$offset.";");
+            $sth = $db->prepare("select name from run where base=:base and (state=2 or score=-1) offset :offset;");
             $sth->bindValue(':base', $base["id"], PDO::PARAM_INT);
+            $sth->bindValue(':offset', $offset, PDO::PARAM_INT);
             $sth->execute();
             $runNames = [];
             while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
