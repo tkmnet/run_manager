@@ -46,9 +46,10 @@ class ControlPage extends AbstractPage
             }
 			return;
         } elseif ($cmd === "update_score") {
-		    $base = BaseManager::getBase($params[1]);
+            $base = BaseManager::getBase($params[1]);
+            $offset = 0 + $params[2];
             $db = BaseManager::connectDB();
-            $sth = $db->prepare("select name from run where base=:base and (state=2 or score=-1);");
+            $sth = $db->prepare("select name from run where base=:base and (state=2 or score=-1) offset ".$offset.";");
             $sth->bindValue(':base', $base["id"], PDO::PARAM_INT);
             $sth->execute();
             $runNames = [];
@@ -61,7 +62,7 @@ class ControlPage extends AbstractPage
                 BaseManager::updateScore($runName, $db);
                 if (++$c >= 30) {
                     $db->commit();
-                    header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[1].'/runlist/update_score');
+                    header('location: '.Config::$TOP_PATH.'app/tkmnet/run_manager/'.$params[1].'/runlist/update_score/'.($offset + $c));
                     return;
                 }
             }
