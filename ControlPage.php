@@ -49,7 +49,7 @@ class ControlPage extends AbstractPage
             $base = BaseManager::getBase($params[1]);
             $offset = ($param_count >= 3 ? 0 + $params[2] : 0);
             $db = BaseManager::connectDB();
-            $sth = $db->prepare("select name from run where base=:base and (state=2 or score=-1) offset :offset;");
+            $sth = $db->prepare("select name from run where base=:base and (state=2 or score=-1) limit 65535 offset :offset;");
             $sth->bindValue(':base', $base["id"], PDO::PARAM_INT);
             $sth->bindValue(':offset', $offset, PDO::PARAM_INT);
             $sth->execute();
