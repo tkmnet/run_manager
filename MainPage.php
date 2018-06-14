@@ -19,7 +19,7 @@ class MainPage extends AbstractPage
 				$this->cmd = $params[1];
                 if (count($params) >= 3) {
                     $this->cmd2 = $params[2];
-                    if (count($params) >= 3) {
+                    if (count($params) >= 4) {
                         $this->cmd3 = $params[3];
                     }
                 }
