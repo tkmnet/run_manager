@@ -47,7 +47,7 @@ class MainPage extends AbstractPage
 			    <?php
             } else if ($this->cmd2 === "update_score") {
                 ?>
-                <meta http-equiv="refresh" content="0.01;URL=<?= str_repeat("../", $this->param_count) =>run_manager-control/update_score/<?= $this->base["name"] ?>/<?= $this->cmd3 ?>">
+                <meta http-equiv="refresh" content="0.01;URL=<?= str_repeat("../", $this->param_count) ?>run_manager-control/update_score/<?= $this->base["name"] ?>/<?= $this->cmd3 ?>">
                 <?php
             }
         } else if ($this->base != null) {
