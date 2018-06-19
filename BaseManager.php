@@ -107,7 +107,7 @@ class BaseManager
 		$simulator = json_decode(file_get_contents($tmpFileOut), true);
 		system("rm -f " . $tmpFileOut);
 		$simulator['name'] = "RO_tkmnetRM_" . uniqid();
-		$simulator['command'] = '/home/oacis/rrs-oacis/rrsenv/script/rrscluster run -c ../rrscluster.cfg -i ./_input.json -l ./';
+		$simulator['command'] = '/home/oacis/rrs-oacis/rrsenv/script/rrscluster run -c ../rrscluster.cfg -i ./_input.json -l ./--ce';
 		$simulator['executable_on_ids'][] = ClusterManager::getMainHostGroup();
 		$simulator['support_input_json'] = true;
 
