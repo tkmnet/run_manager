@@ -736,10 +736,7 @@ class BaseManager
 
 	public static function getOacisRun($run, $db = null)
 	{
-		$rawData = false;
-		try {
-			$rawData = file_get_contents('http://127.0.0.1:3000/runs/'.$run["runId"].'.json');
-		} catch (Exception $e) { }
+		$rawData = @file_get_contents('http://127.0.0.1:3000/runs/'.$run["runId"].'.json');
 		
 		if ($rawData === false) {
 			$oacisPS = self::getOacisParameterSets($run);
