@@ -736,7 +736,11 @@ class BaseManager
 
 	public static function getOacisRun($run, $db = null)
 	{
-		$rawData = file_get_contents('http://127.0.0.1:3000/runs/'.$run["runId"].'.json');
+		$rawData = false;
+		try {
+			$rawData = file_get_contents('http://127.0.0.1:3000/runs/'.$run["runId"].'.json');
+		} catch (Exception $e) { }
+		
 		if ($rawData === false) {
 			$oacisPS = self::getOacisParameterSets($run);
 			if ($oacisPS === false) { return false; }
@@ -745,8 +749,8 @@ class BaseManager
 			$newRunId = $oacisPS->runs[count($oacisPS->runs)-1]->id;
 
 			if ($db === null) {
-                $db = self::connectDB();
-            }
+                		$db = self::connectDB();
+            		}
 			$sth = $db->prepare("update run set runId=:runId where id=:id;");
 			$sth->bindValue(':id', $run["id"], PDO::PARAM_INT);
 			$sth->bindValue(':runId', $newRunId, PDO::PARAM_STR);
@@ -754,6 +758,7 @@ class BaseManager
 
 			$rawData = file_get_contents('http://127.0.0.1:3000/runs/'.$newRunId.'.json');
 		}
+		
 		return json_decode($rawData);
 	}
 
