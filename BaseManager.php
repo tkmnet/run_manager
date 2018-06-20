@@ -810,7 +810,7 @@ class BaseManager
 		}
 	}
 
-	public static function printResultCsv($name)
+	public static function printResultCsv($name, $mode = "all")
 	{
 		$base = self::getBase($name);
 		if ($base !== null) {
@@ -843,13 +843,42 @@ class BaseManager
                 $result .= "\"Score\",\n";
                 print $result;
 			}
-
+	if ($mode === "all")
+	{
             $sth = $db->prepare("select csvtext from run where base=:base;");
             $sth->bindValue(':base', $base["id"], PDO::PARAM_INT);
             $sth->execute();
             while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
                 print $row["csvtext"];
             }
+	}
+	else if ($mode === "max")
+	{
+            $sth = $db->prepare("select csvtext from run where base=:base;");
+            $sth->bindValue(':base', $base["id"], PDO::PARAM_INT);
+            $sth->execute();
+            while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
+                print $row["csvtext"];
+            }
+	}
+	else if ($mode === "mean")
+	{
+            $sth = $db->prepare("select csvtext from run where base=:base;");
+            $sth->bindValue(':base', $base["id"], PDO::PARAM_INT);
+            $sth->execute();
+            while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
+                print $row["csvtext"];
+            }
+	}
+	else if ($mode === "med")
+	{
+            $sth = $db->prepare("select csvtext from run where base=:base;");
+            $sth->bindValue(':base', $base["id"], PDO::PARAM_INT);
+            $sth->execute();
+            while ($row = $sth->fetch(PDO::FETCH_ASSOC)) {
+                print $row["csvtext"];
+            }
+	}
 		}
 
 		return "";
