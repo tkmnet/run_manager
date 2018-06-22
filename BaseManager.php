@@ -742,7 +742,7 @@ class BaseManager
 
 	public static function getOacisParameterSets($run)
 	{
-		$rawData = file_get_contents('http://127.0.0.1:3000/parameter_sets/'.$run["paramId"].'.json');
+		$rawData = @file_get_contents('http://127.0.0.1:3000/parameter_sets/'.$run["paramId"].'.json');
 		if ($rawData === false) { return false; }
 		return json_decode($rawData);
 	}
@@ -783,8 +783,15 @@ class BaseManager
 			{
 				if ($oacisRun->status === "finished")
 				{
-					$newScore = $oacisRun->result->Score;
-					$finished = true;
+					if (isset($oacisRun->result->Score))
+					{
+						$newScore = $oacisRun->result->Score;
+						$finished = true;
+					}
+					else
+					{
+						ScriptManager::queueBashScript("/home/oacis/oacis/bin/oacis_ruby /home/oacis/rrs-oacis/ruby/repost.rb ". $runName);
+					}
 				}
 			}
 
