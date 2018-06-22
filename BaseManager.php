@@ -790,7 +790,7 @@ class BaseManager
 					}
 					else
 					{
-						ScriptManager::queueBashScript("/home/oacis/oacis/bin/oacis_ruby /home/oacis/rrs-oacis/ruby/repost.rb ". $runName);
+						ScriptManager::queueBashScript("/home/oacis/oacis/bin/oacis_ruby /home/oacis/rrs-oacis/ruby/repost.rb ". $oacisRun->id);
 					}
 				}
 			}
