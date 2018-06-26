@@ -554,10 +554,11 @@ class BaseManager
 		return $runs;
 	}
 
-	public static function getDictText()
+	public static function getDictText($group="")
 	{
 		$db = self::connectDB();
-		$sth = $db->prepare("select name,value from dict;");
+		$sth = $db->prepare("select name,value from dict where group_name=:group;");
+		$sth->bindValue(':group', $group, PDO::PARAM_STR);
 		$sth->execute();
 		$result = "";
 		while ($row = $sth->fetch(PDO::FETCH_ASSOC))
@@ -567,27 +568,31 @@ class BaseManager
 		return $result;
 	}
 
-	public static function addDict($name, $value)
+	public static function addDict($name, $value, $group="")
 	{
 		if ($name === null || $value === null || $name === "" || $value === "") { return; }
 
 		$db = self::connectDB();
-		$sth = $db->prepare("select count(*) as cnt from dict where name=:name and value=:value;");
+		$sth = $db->prepare("select count(*) as cnt from dict where name=:name and value=:value and group_name=:group;");
 		$sth->bindValue(':name', $name, PDO::PARAM_STR);
 		$sth->bindValue(':value', $value, PDO::PARAM_STR);
+		$sth->bindValue(':group', $group, PDO::PARAM_STR);
 		$sth->execute();
 		if ($sth->fetch(PDO::FETCH_ASSOC)["cnt"] > 0) { return; }
-		$sth = $db->prepare("insert into dict(name, value) values(:name, :value);");
+		$sth = $db->prepare("insert into dict(name, value, group) values(:name, :value, :group);");
 		$sth->bindValue(':name', $name, PDO::PARAM_STR);
 		$sth->bindValue(':value', $value, PDO::PARAM_STR);
+		$sth->bindValue(':group', $group, PDO::PARAM_STR);
 		$sth->execute();
 	}
 
-	public static function getDict($name)
+	public static function getDict($name, $group="")
 	{
 		$db = self::connectDB();
-		$sth = $db->prepare("select value from dict where name=:name;");
+		$sth = $db->prepare("select value from dict where name=:name and group_name=:group;");
 		$sth->bindValue(':name', $name, PDO::PARAM_STR);
+		$sth->bindValue(':group', $group, PDO::PARAM_STR);
+		$sth->execute();
 		$sth->execute();
 		$results = [];
 		while ($row = $sth->fetch(PDO::FETCH_ASSOC))
@@ -1092,6 +1097,10 @@ class BaseManager
 		if ($dbVersion <= $version++ )
 		{
 			$db->query("update run set state=2 where state=0;");
+		}
+		if ($dbVersion <= $version++ )
+		{
+			$db->query("alter table dict add column group_name default '';");
 		}
 
 		if ($dbVersion != $version)

@@ -13,6 +13,7 @@ class AddDictPage extends AbstractPage
 	{
 		if (count($params) == 1) {
 			if ($params[0] === "add" && isset($_POST["input"])) {
+				$group = trim($_POST["group"]);
 				$input = explode("\n", $_POST["input"]);
 				$input = array_map('trim', $input);
 				$input = array_filter($input, 'strlen');
@@ -22,7 +23,7 @@ class AddDictPage extends AbstractPage
 					$item = explode(":", $value);
 					$item = array_map('trim', $item);
 					if (count($item) == 2) {
-						BaseManager::addDict($item[0], $item[1]);
+						BaseManager::addDict($item[0], $item[1], $group);
 					}
 				}
 
@@ -62,7 +63,13 @@ class AddDictPage extends AbstractPage
 						class="form-horizontal">
 				<div class="box-body">
 					<div class="form-group">
-						<label for="note" class="col-sm-2 control-label">Name : Value</label>
+						<label for="group" class="col-sm-2 control-label">Group</label>
+						<div class="col-sm-10">
+							<input type="text" class="form-control" id="group" name="group">
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="input" class="col-sm-2 control-label">Contents (Name : Value)</label>
 						<div class="col-sm-10">
 							<textarea class="form-control" id="input" name="input" rows="16"></textarea>
 						</div>
@@ -70,7 +77,6 @@ class AddDictPage extends AbstractPage
 				</div>
 				<!-- /.box-body -->
 				<div class="box-footer">
-					<!-- <button type="submit" class="btn btn-default">キャンセル</button> -->
 					<button type="submit" class="btn btn-primary pull-right">Add</button>
 				</div>
 				<!-- /.box-footer -->

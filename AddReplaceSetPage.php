@@ -11,6 +11,7 @@ class AddReplaceSetPage extends AbstractPage
 {
 	private $base = null;
 	private $replaceSets = null;
+	private $autofillGroup = null;
 
 	public function controller($params)
 	{
@@ -40,6 +41,10 @@ class AddReplaceSetPage extends AbstractPage
 					$this->replaceSets = $replaceSets;
 					break;
 				}
+			}
+
+			if (isset($_POST['autofill_group'])) {
+				$this->autofillGroup = $_POST['autofill_group'];
 			}
 
 			$this->setTitle("Run Manager");
@@ -111,9 +116,13 @@ class AddReplaceSetPage extends AbstractPage
 									</select>
 								<?php } else {
 									$name = str_replace('.', '__DOT__', $param["name"]);
+									$dictResult = '';
+									if ($this->autofillGroup !== null) {
+										$dictResults = BaseManager::getDict(preg_replace("/^(MOD|DEV)_/", "", $param["name"]), $this->autofillGroup);
+										if (count($dictResults) > 0) { $dictResult = $dictResults[0]; }
+									}
 									?>
-									<input type="text" class="form-control" name="<?= $name ?>" autocomplete="off" list="L_<?= $name ?>" placeholder='Value'
-												 required>
+										<input type="text" class="form-control" name="<?= $name ?>" autocomplete="off" list="L_<?= $name ?>" placeholder='Value' value='<?= $dictResult ?>' required>
 									<datalist id="L_<?= $name ?>">
 										<?php foreach (BaseManager::getDict(preg_replace("/^(MOD|DEV)_/", "", $param["name"])) as $val) { ?>
 											<option><?= $val ?></option>
@@ -138,6 +147,15 @@ class AddReplaceSetPage extends AbstractPage
 				</div>
 				<!-- /.box-footer -->
 				<input type="hidden" name="action" value="create">
+			</form>
+			<form action="./<?= $this->replaceSets["id"] ?>" method="POST" class="form-horizontal">
+				<div class="box-footer">
+					<div class="form-group">
+						<div class="col-sm-3">
+							<input type="text" placeholder="Auto fill by Group" class="form-control" name="autofill_group" value="">
+						</div>
+					</div>
+				</div>
 			</form>
 			<div id="add_parameter-form-overlay" class="overlay" style="display: none;">
 				<i class="fa fa-refresh fa-spin"></i>
