@@ -579,7 +579,7 @@ class BaseManager
 		$sth->bindValue(':group', $group, PDO::PARAM_STR);
 		$sth->execute();
 		if ($sth->fetch(PDO::FETCH_ASSOC)["cnt"] > 0) { return; }
-		$sth = $db->prepare("insert into dict(name, value, group) values(:name, :value, :group);");
+		$sth = $db->prepare("insert into dict(name, value, group_name) values(:name, :value, :group);");
 		$sth->bindValue(':name', $name, PDO::PARAM_STR);
 		$sth->bindValue(':value', $value, PDO::PARAM_STR);
 		$sth->bindValue(':group', $group, PDO::PARAM_STR);

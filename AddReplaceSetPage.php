@@ -119,7 +119,7 @@ class AddReplaceSetPage extends AbstractPage
 									$dictResult = '';
 									if ($this->autofillGroup !== null) {
 										$dictResults = BaseManager::getDict(preg_replace("/^(MOD|DEV)_/", "", $param["name"]), $this->autofillGroup);
-										if (count($dictResults) > 0) { $dictResult = $dictResults[0]; }
+										if (count($dictResults) > 0) { $dictResult = $dictResults[count($dictResults) -1]; }
 									}
 									?>
 										<input type="text" class="form-control" name="<?= $name ?>" autocomplete="off" list="L_<?= $name ?>" placeholder='Value' value='<?= $dictResult ?>' required>
