@@ -152,7 +152,10 @@ class AddReplaceSetPage extends AbstractPage
 				<div class="box-footer">
 					<div class="form-group">
 						<div class="col-sm-3">
-							<input type="text" placeholder="Auto fill by Group" class="form-control" name="autofill_group" value="">
+							<div class="input-group">
+								<input type="text" placeholder="Auto fill by Group" class="form-control" name="autofill_group" value="">
+								<span class="input-group-btn"><button type="button" class="btn btn-info btn-flat">Load</button></span>
+							</div>
 						</div>
 					</div>
 				</div>
