@@ -103,7 +103,7 @@ class BaseManager
 	{
 		$tmpFileOut = '/tmp/rrsoacis-out-' . uniqid();
 		$tmpFileIn = '/tmp/rrsoacis-in-' . uniqid();
-		system("sudo -i -u oacis " . Config::$OACISCLI_PATH . " simulator_template -o " . $tmpFileOut . " 2>&1");
+		system(Config::$OACISCLI_PATH . " simulator_template -o " . $tmpFileOut . " 2>&1");
 		$simulator = json_decode(file_get_contents($tmpFileOut), true);
 		system("rm -f " . $tmpFileOut);
 		$simulator['name'] = "RO_tkmnetRM_" . uniqid();
@@ -195,7 +195,7 @@ class BaseManager
 		}
 
 		file_put_contents($tmpFileIn, json_encode($simulator));
-		system("sudo -i -u oacis " . Config::$OACISCLI_PATH . " create_simulator -i " . $tmpFileIn . " -o " . $tmpFileOut);
+		system(Config::$OACISCLI_PATH . " create_simulator -i " . $tmpFileIn . " -o " . $tmpFileOut);
 		system("rm -f " . $tmpFileIn);
 		$simulatorId = json_decode(file_get_contents($tmpFileOut), true)['simulator_id'];
 		system("rm -f " . $tmpFileOut);
@@ -609,7 +609,7 @@ class BaseManager
 		{
 			$tmpFileOut = '/tmp/rrsoacis-out-' . uniqid();
 			$tmpFileIn = '/tmp/rrsoacis-in-' . uniqid();
-			system("sudo -i -u oacis " . Config::$OACISCLI_PATH . " simulator_template -o " . $tmpFileOut . " 2>&1");
+			system(Config::$OACISCLI_PATH . " simulator_template -o " . $tmpFileOut . " 2>&1");
 			$simulator = json_decode(file_get_contents($tmpFileOut), true);
 			system("rm -f " . $tmpFileOut);
 			$simulator['name'] = "RO_tkmnetRM_" . uniqid();
@@ -712,7 +712,7 @@ class BaseManager
 			}
 
 			file_put_contents($tmpFileIn, json_encode($simulator));
-			system("sudo -i -u oacis " . Config::$OACISCLI_PATH . " create_simulator -i " . $tmpFileIn . " -o " . $tmpFileOut);
+			system(Config::$OACISCLI_PATH . " create_simulator -i " . $tmpFileIn . " -o " . $tmpFileOut);
 			system("rm -f " . $tmpFileIn);
 			$simulatorId = json_decode(file_get_contents($tmpFileOut), true)['simulator_id'];
 			system("rm -f " . $tmpFileOut);
